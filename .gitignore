@@ -1,0 +1,13 @@
+# Strict allowlist — this repo lives in $HOME, so by default we IGNORE
+# everything and only track files explicitly un-ignored below. If you ever
+# `git add .` from here, only the allowlisted files will be picked up.
+
+# Ignore everything at every level
+*
+
+# But allow these specific things
+!.gitignore
+!car-ownership-cost*.html
+
+# Don't traverse into directories at all (extra safety)
+*/
