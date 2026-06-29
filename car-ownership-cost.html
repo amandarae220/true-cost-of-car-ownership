@@ -2510,9 +2510,9 @@
       endpointLabel: '~$1.1M',
       endpointSub:   'no new contributions for 29 yrs',
       annotation: {
-        anchorYr: 9,
-        title: '$946/mo',
-        sub:   'US avg car payment',
+        spanRange: [0, 6],
+        title:     '$946/mo',
+        sub:       'flowing in for 6 yrs (US avg)',
       },
     },
     continuous: {
@@ -2723,30 +2723,41 @@
     ctx.restore();
 
     // ── Scenario annotation: tiny label naming the underlying assumption,
-    //    with a thin connector line pointing to a representative curve point. ──
-    if (scenario.annotation) {
+    //    pointing to a HIGHLIGHTED SEGMENT of the curve (the contribution
+    //    phase, where the dollars are actually flowing in). The thickened
+    //    segment makes it clear which part of the curve the dollars produced. ──
+    if (scenario.annotation && scenario.annotation.spanRange) {
       const a = scenario.annotation;
       const labelX = padL + 28;
       const labelY = padT + 8;
-      const t_norm = a.anchorYr / yearsShown;
-      const idx = Math.round(t_norm * (upperNorm.length - 1));
-      const anchorX = padL + t_norm * innerW;
-      const anchorY = yForSigned(upperNorm[idx] * 0.92);
+      const [yr1, yr2] = a.spanRange;
+      const idx1 = Math.round((yr1 / yearsShown) * (upperNorm.length - 1));
+      const idx2 = Math.round((yr2 / yearsShown) * (upperNorm.length - 1));
+      const midIdx = Math.round((idx1 + idx2) / 2);
+      const midX = padL + (midIdx / (upperNorm.length - 1)) * innerW;
+      const midYC = yForSigned(upperNorm[midIdx] * 0.92);
 
       ctx.save();
-      // Connector line: from below the label down-right to the curve
-      ctx.strokeStyle = 'rgba(58,115,136,0.55)';
-      ctx.lineWidth = 1;
+      // Thicker, brighter curve segment over the contribution range
+      ctx.strokeStyle = '#3a7388';
+      ctx.lineWidth = 4.5;
+      ctx.lineCap = 'round';
       ctx.setLineDash([]);
       ctx.beginPath();
-      ctx.moveTo(labelX + 6, labelY + 32);
-      ctx.lineTo(anchorX, anchorY);
+      for (let i = idx1; i <= idx2; i++) {
+        const v = upperNorm[i];
+        const x = padL + (i / (upperNorm.length - 1)) * innerW;
+        const y = yForSigned(v * 0.92);
+        i === idx1 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+      }
       ctx.stroke();
-      // Anchor dot on the curve
-      ctx.fillStyle = '#3a7388';
+      // Connector from below the label to the segment midpoint
+      ctx.strokeStyle = 'rgba(58,115,136,0.55)';
+      ctx.lineWidth = 1;
       ctx.beginPath();
-      ctx.arc(anchorX, anchorY, 2.5, 0, Math.PI * 2);
-      ctx.fill();
+      ctx.moveTo(labelX + 24, labelY + 34);
+      ctx.lineTo(midX, midYC);
+      ctx.stroke();
       // Title — Oswald, steel teal
       ctx.fillStyle = '#3a7388';
       ctx.font = '700 15px "Oswald", system-ui, sans-serif';
