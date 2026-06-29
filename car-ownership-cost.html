@@ -1060,6 +1060,32 @@
       letter-spacing: 0.16em;
       color: var(--muted);
     }
+    .mirror-basis {
+      font-family: 'IBM Plex Serif', Georgia, serif;
+      font-size: 0.92rem;
+      line-height: 1.6;
+      color: var(--muted);
+      margin: 0.4rem 0 1.1rem;
+      padding: 0.75rem 0.9rem;
+      border-left: 2px solid var(--for-you);
+      background: rgba(58,115,136,0.05);
+      border-radius: 0 2px 2px 0;
+    }
+    .mirror-basis strong {
+      font-family: 'Oswald', system-ui, sans-serif;
+      font-weight: 600;
+      color: var(--text);
+      letter-spacing: 0.005em;
+    }
+    .mirror-basis .mirror-basis-tag {
+      display: inline-block;
+      font-family: 'IBM Plex Mono', ui-monospace, monospace;
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--for-you);
+      margin-right: 0.5rem;
+    }
     .mirror-axis-labels {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -1509,6 +1535,10 @@
         <span class="mirror-title">Compound interest, shown both ways</span>
         <span class="mirror-act">Act I &middot; the setup</span>
       </div>
+      <p class="mirror-basis">
+        <span class="mirror-basis-tag">What this assumes</span>
+        Curve shows <strong>$946/mo</strong> redirected to an index fund at 7%. That $946 isn't made up &mdash; it's the <strong>US average new-car payment ($787)</strong> plus the <strong>$159/mo extra</strong> you pay in lender-required full-coverage insurance when financing. Buying a clean used car in cash frees up all of it.
+      </p>
       <div class="mirror-canvas">
         <canvas id="mirrorCanvas" aria-label="A two-sided chart. The upper half shows compound growth — the curve you've seen in retirement ads. The lower half is empty and will fill in as the story progresses."></canvas>
       </div>
