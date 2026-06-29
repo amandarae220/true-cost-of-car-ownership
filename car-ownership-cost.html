@@ -2471,17 +2471,70 @@
      `stage` controls how much of the lower half is filled in. Acts I–V update
      this incrementally as the reader scrolls.
   ══════════════════════════════════════ */
-  /* Each mirror canvas is registered with the variant of the visual it shows.
-     Act I primer  — lower empty + ghost outline
-     Act IV reveal — lower fully populates on scroll-into-view (animated)
-     Act V flip    — only upper curve, no lower at all, endpoint dot */
+  /* ── Mirror scenarios ──
+     Each mirror canvas references one of these by name. The scenario controls
+     the shape of the curve (and the dollar labels along it). Two scenarios:
+
+     1. twoPhase — Act I primer.
+        Contribute $946/mo for the loan period (69 months) PLUS an upfront
+        $42,326 lump (the difference between a new car and a used one), then
+        STOP contributing. Let it compound at 7% through year 35. The slope
+        change at year 6 is the lesson: time, not contributions, does most
+        of the work.
+
+     2. continuous — Act IV reveal + Act V flip.
+        Contribute $946/mo for all 35 years, plus the same $42,326 lump.
+        The "lifetime discipline" ceiling. Lands at $2.16M.
+
+     The dollar figures along each curve are tied to the actual annuity math
+     so a reader can recognize the endpoint number in the surrounding copy. */
+  const SCENARIOS = {
+    twoPhase: {
+      yearsShown: 35,
+      valueAt(months) {
+        const rMo = 0.07 / 12, lump = 42326, monthly = 946, phaseEnd = 69;
+        if (months <= phaseEnd) {
+          return lump * Math.pow(1 + rMo, months)
+               + monthly * (Math.pow(1 + rMo, months) - 1) / rMo;
+        }
+        const v1 = lump * Math.pow(1 + rMo, phaseEnd)
+                 + monthly * (Math.pow(1 + rMo, phaseEnd) - 1) / rMo;
+        return v1 * Math.pow(1 + rMo, months - phaseEnd);
+      },
+      yearTicks: [0, 6, 15, 25, 35],
+      dataPoints: [
+        { yr: 6,  label: '~$144k', subLabel: 'contributions end' },
+        { yr: 20, label: '~$390k' },
+        { yr: 30, label: '~$780k' },
+      ],
+      endpointLabel: '~$1.1M',
+      endpointSub:   'no new contributions for 29 yrs',
+    },
+    continuous: {
+      yearsShown: 35,
+      valueAt(months) {
+        const rMo = 0.07 / 12, lump = 42326, monthly = 946;
+        return lump * Math.pow(1 + rMo, months)
+             + monthly * (Math.pow(1 + rMo, months) - 1) / rMo;
+      },
+      yearTicks: [0, 10, 20, 30, 35],
+      dataPoints: [
+        { yr: 10, label: '~$250k' },
+        { yr: 20, label: '~$660k' },
+        { yr: 30, label: '~$1.5M' },
+      ],
+      endpointLabel: '$2.16M',
+      endpointSub:   'at age 65',
+    },
+  };
+
   const MIRROR_INSTANCES = [
-    { id: 'mirrorCanvas',  lossFraction: 0, flipped: false },
-    { id: 'mirrorCanvas2', lossFraction: 0, flipped: false, animateTo: 1 },
-    { id: 'mirrorCanvas3', lossFraction: 0, flipped: true  },
+    { id: 'mirrorCanvas',  lossFraction: 0, flipped: false, scenario: 'twoPhase'   },
+    { id: 'mirrorCanvas2', lossFraction: 0, flipped: false, scenario: 'continuous', animateTo: 1 },
+    { id: 'mirrorCanvas3', lossFraction: 0, flipped: true,  scenario: 'continuous' },
   ];
 
-  function drawMirror(canvasId, lossFraction, flipped) {
+  function drawMirror(canvasId, lossFraction, flipped, scenarioName) {
     const canvas = document.getElementById(canvasId);
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
@@ -2495,23 +2548,17 @@
     // Padding leaves room for the year axis labels below and a small left
     // margin for the $0 anchor. Side scale labels removed — the HTML
     // .mirror-axis-labels below the chart explains gains vs. losses.
-    const padL = 22, padR = 22, padT = 28, padB = 32;
+    const padL = 22, padR = 22, padT = 28, padB = 36;
     const innerW = W - padL - padR;
     const innerH = H - padT - padB;
     const midY = padT + innerH / 2;
-    const yearsShown = 35;
 
-    // Data points keyed to the actual counterfactual math:
-    // $42,326 upfront lump (50326 - 8000) + $946/mo, compounded monthly at 7%.
-    // These tie the curve to specific numbers the reader can recognize from
-    // the finale callout below the chart.
-    const DOLLAR_POINTS = [
-      { yr: 10, label: '~$250k' },
-      { yr: 20, label: '~$660k' },
-      { yr: 30, label: '~$1.5M' },
-    ];
-    const ENDPOINT_LABEL = '$2.16M';
-    const ENDPOINT_SUB   = 'at age 65';
+    const scenario = SCENARIOS[scenarioName] || SCENARIOS.continuous;
+    const yearsShown = scenario.yearsShown;
+    const yearTicks  = scenario.yearTicks;
+    const DOLLAR_POINTS  = scenario.dataPoints;
+    const ENDPOINT_LABEL = scenario.endpointLabel;
+    const ENDPOINT_SUB   = scenario.endpointSub;
 
     // ── Zero axis ──
     ctx.save();
@@ -2528,11 +2575,13 @@
     const yForSigned = (signed) => midY - signed * (innerH / 2 - 4);
 
     // ── UPPER CURVE: compound growth (steel teal) ──
+    // Sample the scenario's value function across the time span and normalize
+    // to the chart's vertical extent (0..1 = $0..max).
+    const SAMPLES = 180;
     const upperVals = [];
-    for (let i = 0; i <= 120; i++) {
-      const t = (i / 120) * yearsShown;
-      const v = Math.pow(1.07, t) - 1;
-      upperVals.push(v);
+    for (let i = 0; i <= SAMPLES; i++) {
+      const months = (i / SAMPLES) * yearsShown * 12;
+      upperVals.push(scenario.valueAt(months));
     }
     const upperMax = upperVals[upperVals.length - 1];
     const upperNorm = upperVals.map(v => v / upperMax);
@@ -2602,7 +2651,6 @@
     ctx.font = '500 10px "IBM Plex Mono", ui-monospace, monospace';
     ctx.textBaseline = 'top';
     ctx.setLineDash([]);
-    const yearTicks = [0, 10, 20, 30, 35];
     yearTicks.forEach((year, idx) => {
       const x = padL + (year / yearsShown) * innerW;
       ctx.beginPath();
@@ -2634,7 +2682,7 @@
     // Dashed guide lines from the zero axis up to a dot on the curve, with
     // a dollar label above each dot. Anchors abstract growth to real numbers.
     ctx.save();
-    DOLLAR_POINTS.forEach(({ yr, label }) => {
+    DOLLAR_POINTS.forEach(({ yr, label, subLabel }) => {
       const t_norm = yr / yearsShown;
       const idx = Math.round(t_norm * (upperNorm.length - 1));
       const v = upperNorm[idx];
@@ -2648,11 +2696,11 @@
       ctx.moveTo(x, midY);
       ctx.lineTo(x, y);
       ctx.stroke();
-      // Dot
+      // Dot — slightly larger when this point also marks a phase change
       ctx.setLineDash([]);
       ctx.fillStyle = '#3a7388';
       ctx.beginPath();
-      ctx.arc(x, y, 3, 0, Math.PI * 2);
+      ctx.arc(x, y, subLabel ? 4 : 3, 0, Math.PI * 2);
       ctx.fill();
       // Dollar label above the dot
       ctx.fillStyle = '#3a7388';
@@ -2660,6 +2708,12 @@
       ctx.textAlign = 'center';
       ctx.textBaseline = 'bottom';
       ctx.fillText(label, x, y - 7);
+      // Optional sub-label (e.g. "contributions end" at the phase-change point)
+      if (subLabel) {
+        ctx.font = '500 9px "IBM Plex Mono", ui-monospace, monospace';
+        ctx.fillStyle = 'rgba(110,102,90,0.95)';
+        ctx.fillText(subLabel, x, y - 20);
+      }
     });
     ctx.restore();
 
@@ -2720,7 +2774,7 @@
   }
 
   function drawAllMirrors() {
-    MIRROR_INSTANCES.forEach(m => drawMirror(m.id, m.lossFraction, m.flipped));
+    MIRROR_INSTANCES.forEach(m => drawMirror(m.id, m.lossFraction, m.flipped, m.scenario));
   }
 
   /* Scroll-triggered animation: when a mirror with `animateTo` enters the
@@ -2744,7 +2798,7 @@
           const t = Math.min((now - start) / dur, 1);
           const eased = 1 - Math.pow(1 - t, 3);
           mi.lossFraction = from + (to - from) * eased;
-          drawMirror(mi.id, mi.lossFraction, mi.flipped);
+          drawMirror(mi.id, mi.lossFraction, mi.flipped, mi.scenario);
           if (t < 1) requestAnimationFrame(tick);
           else { mi._animating = false; mi._done = true; }
         }
