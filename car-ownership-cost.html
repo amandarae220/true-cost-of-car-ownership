@@ -1060,32 +1060,6 @@
       letter-spacing: 0.16em;
       color: var(--muted);
     }
-    .mirror-basis {
-      font-family: 'IBM Plex Serif', Georgia, serif;
-      font-size: 0.92rem;
-      line-height: 1.6;
-      color: var(--muted);
-      margin: 0.4rem 0 1.1rem;
-      padding: 0.75rem 0.9rem;
-      border-left: 2px solid var(--for-you);
-      background: rgba(58,115,136,0.05);
-      border-radius: 0 2px 2px 0;
-    }
-    .mirror-basis strong {
-      font-family: 'Oswald', system-ui, sans-serif;
-      font-weight: 600;
-      color: var(--text);
-      letter-spacing: 0.005em;
-    }
-    .mirror-basis .mirror-basis-tag {
-      display: inline-block;
-      font-family: 'IBM Plex Mono', ui-monospace, monospace;
-      font-size: 0.7rem;
-      text-transform: uppercase;
-      letter-spacing: 0.12em;
-      color: var(--for-you);
-      margin-right: 0.5rem;
-    }
     .mirror-axis-labels {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -1535,10 +1509,6 @@
         <span class="mirror-title">Compound interest, shown both ways</span>
         <span class="mirror-act">Act I &middot; the setup</span>
       </div>
-      <p class="mirror-basis">
-        <span class="mirror-basis-tag">What this assumes</span>
-        Curve shows <strong>$946/mo</strong> redirected to an index fund at 7%. That $946 isn't made up &mdash; it's the <strong>US average new-car payment ($787)</strong> plus the <strong>$159/mo extra</strong> you pay in lender-required full-coverage insurance when financing. Buying a clean used car in cash frees up all of it.
-      </p>
       <div class="mirror-canvas">
         <canvas id="mirrorCanvas" aria-label="A two-sided chart. The upper half shows compound growth — the curve you've seen in retirement ads. The lower half is empty and will fill in as the story progresses."></canvas>
       </div>
@@ -2539,6 +2509,11 @@
       ],
       endpointLabel: '~$1.1M',
       endpointSub:   'no new contributions for 29 yrs',
+      annotation: {
+        anchorYr: 9,
+        title: '$946/mo',
+        sub:   'US avg car payment',
+      },
     },
     continuous: {
       yearsShown: 35,
@@ -2746,6 +2721,44 @@
       }
     });
     ctx.restore();
+
+    // ── Scenario annotation: tiny label naming the underlying assumption,
+    //    with a thin connector line pointing to a representative curve point. ──
+    if (scenario.annotation) {
+      const a = scenario.annotation;
+      const labelX = padL + 28;
+      const labelY = padT + 8;
+      const t_norm = a.anchorYr / yearsShown;
+      const idx = Math.round(t_norm * (upperNorm.length - 1));
+      const anchorX = padL + t_norm * innerW;
+      const anchorY = yForSigned(upperNorm[idx] * 0.92);
+
+      ctx.save();
+      // Connector line: from below the label down-right to the curve
+      ctx.strokeStyle = 'rgba(58,115,136,0.55)';
+      ctx.lineWidth = 1;
+      ctx.setLineDash([]);
+      ctx.beginPath();
+      ctx.moveTo(labelX + 6, labelY + 32);
+      ctx.lineTo(anchorX, anchorY);
+      ctx.stroke();
+      // Anchor dot on the curve
+      ctx.fillStyle = '#3a7388';
+      ctx.beginPath();
+      ctx.arc(anchorX, anchorY, 2.5, 0, Math.PI * 2);
+      ctx.fill();
+      // Title — Oswald, steel teal
+      ctx.fillStyle = '#3a7388';
+      ctx.font = '700 15px "Oswald", system-ui, sans-serif';
+      ctx.textAlign = 'left';
+      ctx.textBaseline = 'top';
+      ctx.fillText(a.title, labelX, labelY);
+      // Sub — mono, muted
+      ctx.fillStyle = 'rgba(110,102,90,0.95)';
+      ctx.font = '500 9.5px "IBM Plex Mono", ui-monospace, monospace';
+      ctx.fillText(a.sub, labelX, labelY + 18);
+      ctx.restore();
+    }
 
     // ── Endpoint annotation: $2.16M / at age 65 (both states) ──
     {
