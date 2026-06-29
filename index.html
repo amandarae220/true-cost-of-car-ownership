@@ -1072,6 +1072,8 @@
     }
     .mirror-axis-labels .upper { color: var(--for-you); }
     .mirror-axis-labels .lower { color: var(--pitch); }
+    /* Single-axis chart variant: only the upper region exists. */
+    .mirror-axis-labels--single { grid-template-columns: 1fr; }
     .mirror-canvas {
       position: relative;
       width: 100%;
@@ -1601,18 +1603,17 @@
   <article class="beat">
     <div class="mirror-wrap">
       <div class="mirror-caption">
-        <span class="mirror-title">Compound interest, shown both ways</span>
+        <span class="mirror-title">Compound interest, over 35 years</span>
         <span class="mirror-act">Act I &middot; the setup</span>
       </div>
       <div class="mirror-canvas">
-        <canvas id="mirrorCanvas" aria-label="A two-sided chart. The upper half shows compound growth — the curve you've seen in retirement ads. The lower half is empty and will fill in as the story progresses."></canvas>
+        <canvas id="mirrorCanvas" aria-label="A compound growth curve. $946 a month invested for 6 years and then left to compound at 7% reaches about $1.1 million by year 35."></canvas>
       </div>
-      <div class="mirror-axis-labels">
+      <div class="mirror-axis-labels mirror-axis-labels--single">
         <span class="upper">&uarr; What gains compound to (the version they show you in retirement ads)</span>
-        <span class="lower">&darr; What costs compound to (the version no ad ever shows you)</span>
       </div>
     </div>
-    <p class="beat-translation">Same math. Two different directions. The only difference is whether you find yourself in the driver's seat or along for the ride in the back seat.</p>
+    <p class="beat-translation">This is the curve every retirement-account ad uses. Same math, applied to a number the dealership would rather you spent on a monthly payment instead.</p>
     <p class="beat-translation">If you've ever seen a retirement-account ad &mdash; <span class="mono-aside">"start at 25, retire a millionaire"</span> &mdash; that's the top half. The bottom half is what happens when the same force is making money from you, not for you.</p>
   </article>
 
@@ -2617,6 +2618,9 @@
   const SCENARIOS = {
     twoPhase: {
       yearsShown: 35,
+      /* Single-axis chart (positive only). Removes the mirror's empty lower
+         half and gives the upper curve the full vertical room. */
+      chartType: 'upperOnly',
       valueAt(months) {
         const rMo = 0.07 / 12, lump = 42326, monthly = 946, phaseEnd = 69;
         if (months <= phaseEnd) {
@@ -2682,7 +2686,6 @@
     const padL = 22, padR = 22, padT = 28, padB = 36;
     const innerW = W - padL - padR;
     const innerH = H - padT - padB;
-    const midY = padT + innerH / 2;
 
     const scenario = SCENARIOS[scenarioName] || SCENARIOS.continuous;
     const yearsShown = scenario.yearsShown;
@@ -2690,6 +2693,14 @@
     const DOLLAR_POINTS  = scenario.dataPoints;
     const ENDPOINT_LABEL = scenario.endpointLabel;
     const ENDPOINT_SUB   = scenario.endpointSub;
+
+    // Chart geometry. `mirror` (default): zero axis in the center, upper and
+    // lower halves symmetric. `upperOnly`: zero axis at the bottom, single
+    // positive vertical range. Per-scenario via scenario.chartType.
+    const isUpperOnly = scenario.chartType === 'upperOnly';
+    const midY = isUpperOnly ? (H - padB - 1) : (padT + innerH / 2);
+    const upperRange = isUpperOnly ? (innerH - 6) : (innerH / 2 - 4);
+    const yForSigned = (signed) => midY - signed * upperRange;
 
     // ── Zero axis ──
     ctx.save();
@@ -2701,9 +2712,6 @@
     ctx.lineTo(W - padR, midY);
     ctx.stroke();
     ctx.restore();
-
-    // Helper: vertical position for a value 0..1, signed
-    const yForSigned = (signed) => midY - signed * (innerH / 2 - 4);
 
     // ── UPPER CURVE: compound growth (steel teal) ──
     // Sample the scenario's value function across the time span and normalize
@@ -2735,7 +2743,7 @@
     ctx.restore();
 
     // ── LOWER CURVE: reverse-compounding loss ──
-    if (lossFraction > 0) {
+    if (lossFraction > 0 && !isUpperOnly) {
       const cut = Math.floor(upperNorm.length * lossFraction);
       ctx.save();
       ctx.strokeStyle = '#2a3a5a';
@@ -2757,7 +2765,7 @@
     }
 
     // ── Ghost lower outline (primer state, when lower hasn't filled yet) ──
-    if (lossFraction < 1 && !flipped) {
+    if (lossFraction < 1 && !flipped && !isUpperOnly) {
       ctx.save();
       ctx.strokeStyle = 'rgba(42,58,90,0.45)';
       ctx.lineWidth = 1.25;
@@ -2786,7 +2794,9 @@
       const x = padL + (year / yearsShown) * innerW;
       ctx.beginPath();
       ctx.moveTo(x, midY - 4);
-      ctx.lineTo(x, midY + 4);
+      // In upperOnly mode the zero axis sits at the chart bottom, so the tick
+      // extends only upward to stay inside the chart frame.
+      ctx.lineTo(x, isUpperOnly ? midY : midY + 4);
       ctx.stroke();
       let label;
       if (year === 0) label = 'now';
@@ -2933,7 +2943,7 @@
     }
 
     // ── Loss endpoint: −$X callout for filled lower curve (Act IV reveal in main) ──
-    if (lossFraction >= 1) {
+    if (lossFraction >= 1 && !isUpperOnly) {
       const lastX = padL + innerW;
       const lastY = yForSigned(-upperNorm[upperNorm.length - 1] * 0.92);
       ctx.save();
