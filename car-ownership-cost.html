@@ -816,6 +816,114 @@
     }
 
     /* ════════════════════════════════════
+       FAQ — native <details>/<summary> accordions
+       Covers the rationalizations + nuance that the light version cuts
+       from the main scroll. Reader can opt in to as much depth as they want.
+    ════════════════════════════════════ */
+    .faq {
+      max-width: 760px;
+      margin: 0 auto;
+    }
+    .faq-group-label {
+      font-family: 'IBM Plex Mono', ui-monospace, monospace;
+      font-size: 0.7rem;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      color: var(--muted);
+      margin-top: 2.5rem;
+      margin-bottom: 0.85rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .faq-group-label:first-child { margin-top: 0; }
+    .faq details {
+      margin-bottom: 0.55rem;
+    }
+    .faq summary {
+      cursor: pointer;
+      font-family: 'Oswald', system-ui, sans-serif;
+      font-size: clamp(0.98rem, 1.5vw, 1.08rem);
+      font-weight: 600;
+      letter-spacing: 0;
+      color: var(--text);
+      padding: 1.05rem 1.25rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 2px;
+      list-style: none;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      transition: background 0.15s, border-color 0.15s;
+    }
+    .faq summary::-webkit-details-marker { display: none; }
+    .faq summary::after {
+      content: '+';
+      margin-left: auto;
+      font-family: 'IBM Plex Mono', ui-monospace, monospace;
+      font-size: 1.5rem;
+      font-weight: 300;
+      color: var(--muted);
+      line-height: 1;
+      transition: color 0.15s;
+    }
+    .faq summary:hover {
+      background: var(--surf2);
+      border-color: var(--muted);
+    }
+    .faq summary:hover::after { color: var(--text); }
+    .faq summary:focus-visible {
+      outline: 2px solid var(--for-you);
+      outline-offset: 2px;
+    }
+    .faq details[open] > summary {
+      border-bottom-color: transparent;
+      border-radius: 2px 2px 0 0;
+      background: var(--surf2);
+    }
+    .faq details[open] > summary::after { content: '\2212'; color: var(--text); }
+    .faq-body {
+      padding: 1.5rem 1.4rem 1.6rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-top: none;
+      border-radius: 0 0 2px 2px;
+      font-family: 'IBM Plex Serif', Georgia, serif;
+      font-size: 1.02rem;
+      line-height: 1.7;
+      color: var(--text);
+    }
+    .faq-body p { margin-bottom: 0.95rem; }
+    .faq-body p:last-child { margin-bottom: 0; }
+    .faq-body strong { font-weight: 600; }
+    .faq-body em { font-style: italic; color: var(--text); }
+    .faq-body .receipt-mini {
+      font-family: 'IBM Plex Mono', ui-monospace, monospace;
+      font-size: 0.88rem;
+      background: var(--surf2);
+      border: 1px solid var(--border);
+      border-radius: 2px;
+      padding: 0.85rem 1rem;
+      margin: 0.85rem 0;
+      line-height: 1.55;
+    }
+    .faq-body .receipt-mini-line {
+      display: flex;
+      gap: 0.5rem;
+      align-items: baseline;
+    }
+    .faq-body .receipt-mini-line .leader {
+      flex: 1;
+      border-bottom: 1px dotted var(--border);
+      transform: translateY(-3px);
+      min-width: 1rem;
+    }
+    .faq-body .receipt-mini-line .val { font-weight: 600; white-space: nowrap; }
+    .faq-body .receipt-mini-line .val.hidden { color: var(--hidden); }
+    .faq-body .receipt-mini-line .val.mechanism { color: var(--mechanism); }
+
+    /* ════════════════════════════════════
        SERIES HANDOFF (Act VI close → Part 2)
     ════════════════════════════════════ */
     .series-handoff {
@@ -1825,6 +1933,121 @@
       </div>
 
     </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════
+     FAQ — opt-in depth for the cases the main scroll skipped.
+     Covers the rationalizations and the nuance (when debt actually works).
+══════════════════════════════════════ -->
+<section class="act" id="faq">
+  <div class="act-intro visible">
+    <span class="act-eyebrow">Frequently Asked</span>
+    <h2 class="act-title">&ldquo;But what about &mdash;&rdquo;</h2>
+    <p class="act-lede">A lot of the math above gets met with the same handful of objections. Here's where each one actually lands when you do the numbers &mdash; including the cases where the math works <em>in your favor</em>. Open whichever ones speak to you.</p>
+  </div>
+
+  <div class="faq">
+
+    <div class="faq-group-label">The stories we tell ourselves</div>
+
+    <details>
+      <summary>&ldquo;A new car is more reliable. Won't repairs on a used car cost me more in the long run?&rdquo;</summary>
+      <div class="faq-body">
+        <p>Reliability isn't really the issue &mdash; a four-year-old Toyota or Honda solves it. The average annual repair bill on a five-year-old car is about <strong>$548</strong>. The year-one depreciation hit on a new car averages around <strong>$11,000</strong>. So:</p>
+        <div class="receipt-mini">
+          <div class="receipt-mini-line"><span>Year-1 depreciation on a new car</span><span class="leader"></span><span class="val hidden">~$11,000</span></div>
+          <div class="receipt-mini-line"><span>Annual repair budget on a 5-yr-old car</span><span class="leader"></span><span class="val">$548</span></div>
+          <div class="receipt-mini-line"><span>Years of repairs to equal that loss</span><span class="leader"></span><span class="val">20+</span></div>
+        </div>
+        <p>You'd need <strong>20+ years of repairs</strong> on a used car to break even on the depreciation of buying new. What &ldquo;new&rdquo; actually buys is <em>convenience</em> &mdash; no surprise bills, no Saturday at the mechanic. That's real value. It's also about ten times the price of the thing it's avoiding.</p>
+      </div>
+    </details>
+
+    <details>
+      <summary>&ldquo;But I really need a reliable car for work. I can't risk a breakdown.&rdquo;</summary>
+      <div class="faq-body">
+        <p>Reliable transportation is a category, not a price tag. A four-year-old Camry or Civic that's been through one careful owner solves the &ldquo;I have to be at work on Monday&rdquo; problem identically to a new SUV.</p>
+        <div class="receipt-mini">
+          <div class="receipt-mini-line"><span>4-yr-old Camry/Civic, good condition</span><span class="leader"></span><span class="val">$18,000</span></div>
+          <div class="receipt-mini-line"><span>New SUV (US average)</span><span class="leader"></span><span class="val">$50,326</span></div>
+          <div class="receipt-mini-line"><span>The gap, which is not transportation</span><span class="leader"></span><span class="val hidden">$32,326</span></div>
+        </div>
+        <p>The extra $32,000 isn't the car &mdash; it's the <em>feeling of newness</em>. Which is real. But it's also thirty-two thousand dollars of feeling.</p>
+      </div>
+    </details>
+
+    <details>
+      <summary>&ldquo;I'll keep this car forever, so the depreciation doesn't matter.&rdquo;</summary>
+      <div class="faq-body">
+        <p>Almost nobody keeps a car forever. The honest US average is about <strong>8.4 years</strong> &mdash; right when depreciation has done most of its work and the new-car itch returns. Fewer than 14% of owners hold a car past 15 years.</p>
+        <p>And here's the part that surprises people: <strong>even if you really do keep it for twenty years, the depreciation didn't disappear.</strong> It happened privately, in the first six years, while you weren't looking at the resale value. The market value drop is a cost whether you sell the car or not &mdash; it just becomes invisible if you don't transact.</p>
+      </div>
+    </details>
+
+    <details>
+      <summary>&ldquo;I work hard. I deserve this.&rdquo;</summary>
+      <div class="faq-body">
+        <p>You probably do. Nobody's arguing that. But &ldquo;I deserve this&rdquo; isn't a math claim &mdash; it's a values claim, and we're not going to pretend otherwise.</p>
+        <p>It shows up here because it's the only sentence in the entire dealership that <em>doesn't have a receipt</em>. No interest line. No depreciation line. No retirement-trade-off line. Just rhetoric. That's not an accident &mdash; it's the easiest sentence to weaponize. Knowing that is most of the protection you need.</p>
+      </div>
+    </details>
+
+    <details>
+      <summary>&ldquo;The warranty and free maintenance plan are included. That's real value.&rdquo;</summary>
+      <div class="faq-body">
+        <p>Yes, the warranty is real. Yes, the included oil changes and loaner program are real. Tot them up:</p>
+        <div class="receipt-mini">
+          <div class="receipt-mini-line"><span>3-yr bumper-to-bumper warranty value</span><span class="leader"></span><span class="val">~$1,200</span></div>
+          <div class="receipt-mini-line"><span>10 yrs of &ldquo;free&rdquo; oil changes</span><span class="leader"></span><span class="val">~$1,800</span></div>
+          <div class="receipt-mini-line"><span>Loaner program (avg use)</span><span class="leader"></span><span class="val">~$3,200</span></div>
+          <div class="receipt-mini-line"><span>Real value of all &ldquo;free&rdquo; perks</span><span class="leader"></span><span class="val">~$6,200</span></div>
+          <div class="receipt-mini-line"><span>Depreciation paid to get them</span><span class="leader"></span><span class="val hidden">~$32,000</span></div>
+        </div>
+        <p>That's paying full price for a steak dinner to get the free bread basket. The perks are real; they're just <em>not the deal you think they are</em>.</p>
+      </div>
+    </details>
+
+    <details>
+      <summary>&ldquo;Trade-in value protects me. I'll just trade it in when I'm ready.&rdquo;</summary>
+      <div class="faq-body">
+        <p>Trade-in value doesn't get you out of the depreciation &mdash; it just <em>resets the cycle</em>. You hand the dealer back a car that's lost most of its value over the last six years, and they help you start the next loan at peak depreciation again.</p>
+        <p>The average American driver does this 5&ndash;7 times over a working life. Each cycle has its own ten-thousand-dollar depreciation bite. The dealership is delighted to do it every six years for the rest of your life. <strong>That's not a hedge. That's a subscription.</strong></p>
+      </div>
+    </details>
+
+    <div class="faq-group-label">When the math actually works the other way</div>
+
+    <details>
+      <summary>&ldquo;Wait &mdash; isn't all debt bad?&rdquo;</summary>
+      <div class="faq-body">
+        <p>No. Debt is a tool. Sometimes it's the right one. The question is whether your <em>investment return</em> outpaces your <em>borrowing rate</em>, and whether the thing you bought is holding or losing value. Three quick examples:</p>
+        <div class="receipt-mini">
+          <div class="receipt-mini-line"><span>Mortgage at 3.5% vs. S&amp;P at ~10%</span><span class="leader"></span><span class="val" style="color:var(--for-you);">works for you</span></div>
+          <div class="receipt-mini-line"><span>Auto loan at 6.4% vs. S&amp;P at ~7&ndash;10%</span><span class="leader"></span><span class="val hidden">coin flip &mdash; until depreciation</span></div>
+          <div class="receipt-mini-line"><span>Credit card at 22%</span><span class="leader"></span><span class="val mechanism">catastrophic</span></div>
+        </div>
+        <p>A 3% mortgage on a house that appreciates while the market does 10%? The math works <em>for</em> you. A 22% credit card balance? You can't outrun that. The car loan is interesting precisely because the rate alone is borderline &mdash; it's the depreciation that tips it.</p>
+      </div>
+    </details>
+
+    <details>
+      <summary>&ldquo;Why does depreciation tip the auto loan from break-even to a loss?&rdquo;</summary>
+      <div class="faq-body">
+        <p>Because you're paying interest on something that's losing value at the same time.</p>
+        <p>A mortgage is debt against an asset that mostly holds or appreciates. Even if your rate is meaningful, the underlying thing tends to gain value. The combined math is usually positive.</p>
+        <p>A car loan is debt against an asset that's actively melting. Even if the interest rate alone is close to break-even against the market, the asset is shedding 15&ndash;20% of its value in the first year. The borrowing isn't the problem on its own. <strong>The borrowing combined with a depreciating asset is what makes the math go the wrong way.</strong></p>
+      </div>
+    </details>
+
+    <details>
+      <summary>&ldquo;Why 7%? Isn't the S&amp;P historically higher than that?&rdquo;</summary>
+      <div class="faq-body">
+        <p>7% is the historical <em>real</em> (inflation-adjusted) average return of the S&amp;P 500 over the long run. 10% is the <em>nominal</em> average &mdash; what your statement would say before adjusting for what dollars actually buy.</p>
+        <p>For retirement projections, real returns are what matter, because you'll be spending future dollars on future-priced goods. Using 7% means &ldquo;in today's purchasing power, here's what your money becomes.&rdquo; If you want a more optimistic projection, slide the calculator up to 10%. If you want a more conservative one, slide it down to 5%. The point of the slider is that <em>your assumptions are visible, not hidden</em>.</p>
+      </div>
+    </details>
+
   </div>
 </section>
 
