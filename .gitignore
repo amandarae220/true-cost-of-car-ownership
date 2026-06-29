@@ -5,9 +5,10 @@
 # Ignore everything at every level
 *
 
-# But allow these specific things
+# But allow these specific files
 !.gitignore
-!car-ownership-cost*.html
+!index.html
+!README.md
 
 # Don't traverse into directories at all (extra safety)
 */
