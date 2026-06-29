@@ -1072,8 +1072,6 @@
     }
     .mirror-axis-labels .upper { color: var(--for-you); }
     .mirror-axis-labels .lower { color: var(--pitch); }
-    /* Single-axis chart variant: only the upper region exists. */
-    .mirror-axis-labels--single { grid-template-columns: 1fr; }
     .mirror-canvas {
       position: relative;
       width: 100%;
@@ -1311,10 +1309,10 @@
     }
 
     /* ════════════════════════════════════
-       TOOL SECTION (Act V — the interactive calculator)
+       TOOL SECTION (Act VII)
        Compose with .act styling for headings; keep scroll-margin and grid here.
     ════════════════════════════════════ */
-    .act-5 {
+    .act-7 {
       scroll-margin-top: 3.5rem;
       padding-bottom: 5rem;
     }
@@ -1390,57 +1388,9 @@
     }
 
     /* Controls */
-    /* ════════════════════════════════════
-       INPUT / OUTPUT HIERARCHY — signal which zone is yours to control
-       and which zone is the math's response. Subtle ochre tint on the input
-       column, mono "Adjust" / "Your numbers" tags above each zone.
-    ════════════════════════════════════ */
-    .zone-header {
-      max-width: 1240px;
-      margin: 0 auto 0.85rem;
-      display: flex;
-      align-items: baseline;
-      gap: 0.85rem;
-      flex-wrap: wrap;
-    }
-    .zone-tag {
-      font-family: 'IBM Plex Mono', ui-monospace, monospace;
-      font-size: 0.7rem;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.16em;
-      padding: 0.28rem 0.65rem;
-      border-radius: 2px;
-      color: var(--for-you);
-      background: rgba(58,115,136,0.10);
-      border: 1px solid rgba(58,115,136,0.30);
-    }
-    .zone-tag.input {
-      color: var(--hidden);
-      background: rgba(156,120,32,0.10);
-      border-color: rgba(156,120,32,0.35);
-    }
-    .zone-hint {
-      font-family: 'IBM Plex Mono', ui-monospace, monospace;
-      font-size: 0.72rem;
-      color: var(--muted);
-      letter-spacing: 0.02em;
-    }
-    .controls-header {
-      display: flex;
-      align-items: baseline;
-      gap: 0.65rem;
-      flex-wrap: wrap;
-      margin-bottom: 1.1rem;
-      padding-bottom: 0.85rem;
-      border-bottom: 1px solid var(--border);
-    }
-    .controls-header .zone-hint { font-size: 0.7rem; }
-
     .controls {
-      background: rgba(156,120,32,0.05);   /* faint ochre tint — input zone */
+      background: var(--surface);
       border: 1px solid var(--border);
-      border-left: 3px solid rgba(156,120,32,0.55);
       border-radius: 12px;
       padding: 1.375rem;
       position: sticky;
@@ -1492,31 +1442,7 @@
     .card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1.375rem; }
     .card-title { font-size: 0.95rem; font-weight: 700; margin-bottom: 0.2rem; }
     .card-sub   { font-size: 0.77rem; color: var(--muted); margin-bottom: 1.1rem; line-height: 1.5; }
-    .insight { margin-top: 1rem; padding: 0.9rem 1.1rem; border-radius: 8px; font-size: 0.82rem; color: var(--muted); line-height: 1.65; min-height: 3.2em; }
-    /* Skeleton state — shown before first refresh() populates the insight text.
-       Three pseudo "lines" of shimmering placeholder. Avoids the brittle word
-       "Loading..." and gives a sense that real content is incoming. */
-    .insight.skeleton { color: transparent; user-select: none; padding: 0.9rem 1.1rem; }
-    .insight.skeleton::before,
-    .insight.skeleton::after {
-      content: "";
-      display: block;
-      height: 0.65em;
-      border-radius: 2px;
-      background: linear-gradient(90deg, var(--border) 0%, var(--surf2) 50%, var(--border) 100%);
-      background-size: 200% 100%;
-      animation: skeleton-shimmer 1.4s ease-in-out infinite;
-    }
-    .insight.skeleton::before { width: 92%; margin-bottom: 0.45em; }
-    .insight.skeleton::after  { width: 64%; }
-    @keyframes skeleton-shimmer {
-      0%   { background-position: 100% 0; }
-      100% { background-position: -100% 0; }
-    }
-    @media (prefers-reduced-motion: reduce) {
-      .insight.skeleton::before,
-      .insight.skeleton::after { animation: none; opacity: 0.5; }
-    }
+    .insight { margin-top: 1rem; padding: 0.9rem 1.1rem; border-radius: 8px; font-size: 0.82rem; color: var(--muted); line-height: 1.65; }
     .insight-a { background: rgba(42,58,90,0.10); border: 1px solid rgba(42,58,90,0.30); }
     .insight-b { background: rgba(58,115,136,0.10); border: 1px solid rgba(58,115,136,0.30); }
     .insight strong { color: var(--text); }
@@ -1524,10 +1450,7 @@
     .leg-item { display: flex; align-items: center; gap: 0.4rem; font-size: 0.76rem; color: var(--muted); }
     .leg-swatch { width: 20px; height: 3px; border-radius: 2px; flex-shrink: 0; }
 
-    /* ════════════════════════════════════
-       RESPONSIVE — mobile is treated as a first-class layout, not a fallback.
-       Breakpoints map to layout intent, not to specific device sizes.
-    ════════════════════════════════════ */
+    /* Responsive */
     @media (max-width: 1000px) {
       .tool-layout { grid-template-columns: 1fr; }
       .controls { position: static; max-height: none; }
@@ -1535,27 +1458,7 @@
     @media (max-width: 700px) {
       .scenarios { grid-template-columns: 1fr; }
       .scenario-divider { display: none; }
-    }
-    /* ── Phone-narrow tweaks: ~480px and below ── */
-    @media (max-width: 520px) {
-      /* Mirror chart axis labels stack to one column so long captions stay
-         readable instead of being squeezed into 50% of the width. */
-      .mirror-axis-labels { grid-template-columns: 1fr; gap: 0.35rem; }
-      /* Series nav allows wrapping on tight screens without overflowing. */
-      .series-nav-inner { gap: 0.6rem; padding: 0.55rem 1rem; }
-      .series-parts { gap: 0.4rem; }
-      .series-part { font-size: 0.66rem; padding: 0.25rem 0.6rem; }
-      /* Receipt labels can wrap on long lines instead of clipping the value. */
-      .receipt-line { flex-wrap: wrap; row-gap: 0.1rem; }
-      .receipt-label { white-space: normal; }
-      /* Larger slider thumb hit target on touch. */
-      input[type="range"]::-webkit-slider-thumb { width: 18px; height: 18px; }
-      input[type="range"]::-moz-range-thumb     { width: 18px; height: 18px; }
-      /* Tool section padding tightens. */
-      .act-5 { padding-left: 1rem; padding-right: 1rem; }
-      .controls { padding: 1.1rem; }
-      /* The "Adjust" / "Your numbers" zone header tags wrap cleanly. */
-      .zone-header { margin-bottom: 0.6rem; }
+      .ed-beat { padding: 4rem 1.25rem; }
     }
   </style>
 </head>
@@ -1581,42 +1484,29 @@
      No real numbers yet. The brochure is generic; the chart is empty below.
 ══════════════════════════════════════ -->
 <section class="act act-1" id="act-1">
-
   <div class="act-intro">
-    <span class="act-eyebrow">Act I &middot; The Pitch</span>
-    <h2 class="act-title">How to tell if you're buying a car or a subscription</h2>
-    <p class="act-lede">The tiny asterisk next to an advertised car payment hints at a hidden truth. It's left up to the buyer to do the calculations (most don't). So I did them for you. Pull up a chair and pour a coffee.</p>
+    <h2 class="act-title">How to tell if you're buying a car or paying for a car subscription</h2>
+    <p class="act-lede">Everybody is talking about it: The price of a new car has increased 30% from 2019 to 2025. 
+      However, the explicit cost of a car is only part of the story. 
+      <!--In 2017, the ChooseFI podcast released an episode called <a href="https://choosefi.com/podcast-episode/022-true-cost-car-ownership">The 
+        True Cost Of Car Ownership</a> which covers both the implicit and explicit costs of car ownership.-->
+      <!--It's left up to the buyer to do the calculations (most don't). 
+      So I did them for you. Pull up a chair and pour a coffee.</p-->
+    <p></p>
+    <!--p class="act-lede">Most Americans have seen a dealership advertisement for a new car. The tiny asterisk next to an advertised car payment hints at a hidden truth. 
+      </p-->
   </div>
 
   <!-- Beat 1 — The brochure (standalone artifact: introduces the device) -->
   <article class="beat">
     <div class="brochure-solo">
-      <span class="brochure-tag">What you'll see this Saturday</span>
       <div class="brochure-num">$399<span class="brochure-num-suffix">/mo*</span></div>
-      <p class="brochure-headline">A new ride. Easy financing. You deserve this.</p>
+      <p class="brochure-headline">New car smell included.</p>
       <p class="brochure-sub">* For well-qualified buyers. See dealer for details.</p>
     </div>
-    <p class="beat-translation">Every car ad in America says some version of this. A small monthly number. A friendly verb. An asterisk small enough to completely gloss over. <strong>This visualization shows the cost of ignoring that asterisk.</strong></p>
+    <p class="beat-translation">Most Americans have seen a dealership advertisement for a new car. 
+      It most likely contains a tiny asterisk next to an advertised car payment that hints at a hidden truth. An asterisk small enough to completely gloss over. <strong>This visualization shows the cost of ignoring that asterisk.</strong></p>
   </article>
-
-  <!-- Beat 2 — The compound interest primer (the signature mirror visual, empty below) -->
-  <article class="beat">
-    <div class="mirror-wrap">
-      <div class="mirror-caption">
-        <span class="mirror-title">Compound interest, over 35 years</span>
-        <span class="mirror-act">Act I &middot; the setup</span>
-      </div>
-      <div class="mirror-canvas">
-        <canvas id="mirrorCanvas" aria-label="A compound growth curve. $946 a month invested for 6 years and then left to compound at 7% reaches about $1.1 million by year 35."></canvas>
-      </div>
-      <div class="mirror-axis-labels mirror-axis-labels--single">
-        <span class="upper">&uarr; What gains compound to (the version they show you in retirement ads)</span>
-      </div>
-    </div>
-    <p class="beat-translation">This is the curve every retirement-account ad uses. Same math, applied to a number the dealership would rather you spent on a monthly payment instead.</p>
-    <p class="beat-translation">If you've ever seen a retirement-account ad &mdash; <span class="mono-aside">"start at 25, retire a millionaire"</span> &mdash; that's the top half. The bottom half is what happens when the same force is making money from you, not for you.</p>
-  </article>
-
 </section>
 
 <!-- ══════════════════════════════════════
@@ -1626,10 +1516,10 @@
 ══════════════════════════════════════ -->
 <section class="act act-2" id="act-2">
 
-  <div class="act-intro">
-    <span class="act-eyebrow">Act II &middot; Meet Jordan</span>
-    <h2 class="act-title">It's a Tuesday.</h2>
-    <p class="act-lede">Jordan is thirty. Just got promoted. Has been driving the same hand-me-down sedan since college and figures it's <em>time</em>. Walks into a dealership. The salesperson is friendly. The brochure is clean. The numbers feel reasonable. Here's what's actually being shown &mdash; and what's quietly not.</p>
+  <div class="act-intro">     
+    <h2 class="act-title">Money talks</h2>
+    <!--p class="act-lede">Jordan is thirty. Just got promoted. Has been driving the same hand-me-down sedan since college and figures it's <em>time</em>. Walks into a dealership. The salesperson is friendly. The brochure is clean. The numbers feel reasonable. Here's what's actually being shown &mdash; and what's quietly not.</p-->
+    <p class="act-lede">After a few test drives, its time to get down to business. The sales person will begin crunching the numbers. Unsurprisingly, the total monthly amount will air closer to $767 (the average car payment in the US)</p>
   </div>
 
   <!-- Beat 3 — Sticker price -->
@@ -1672,7 +1562,7 @@
       </div>
     </div>
     <p class="beat-translation">The sticker isn't the total price &mdash; it's the <em>starting point</em>. 
-      Jordan has added almost <strong>$4,700</strong> not shown on the brochure.</p>
+      Almost <strong>$4,700</strong> has been tacked on that wasn't shown on the brochure.</p>
   </article>
 
   <!-- Beat 4 — Monthly payment (with the NPR $1k-club stat as a standalone aside) -->
@@ -1716,14 +1606,15 @@
           <span class="receipt-label">Of which is interest</span>
           <span class="receipt-value mechanism">$8,977</span>
         </div>
-        <p class="receipt-foot">The car costs the same. The math just costs more.</p>
+        <!--p class="receipt-foot">The car costs the same. The math just costs more.</p-->
       </div>
     </div>
     <aside class="stat-aside">
       <span class="stat-aside-num">~ 19%</span>
-      <p class="stat-aside-text"><strong>$787 above is the average.</strong> Almost one in five new car loans now run over a thousand dollars a month &mdash; that's not the high end, that's the <em>new</em> high end. The sticker isn't the only cost. It's not even the biggest one.<span class="stat-aside-source"><a href="https://www.npr.org/2025/10/29/nx-s1-5556935/cost-of-living-cars" target="_blank" rel="noopener">NPR &middot; Oct 2025</a></span></p>
+      <p class="stat-aside-text"><strong>$787/mo is the average.</strong> 
+        19% of car loans now run over a thousand dollars a month making it the second largest expense category for Americans behind housing. </p>
     </aside>
-    <p class="beat-translation">Most people only ever check the monthly. $787 sounds doable. <strong>$8,977 in interest</strong>, paid quietly over six years, is roughly a year of groceries &mdash; handed to the bank for the privilege of borrowing money Jordan didn't have.</p>
+    <p class="beat-translation">Most people only ever check the monthly. Its not $399 but $787 sounds doable. <strong>$8,977 in interest</strong>, paid quietly over six years, (roughly a year of groceries) &mdash; handed to the bank for the privilege of borrowing money Jordan didn't have.</p>
   </article>
 
   <!-- Beat 5 — The hidden insurance -->
@@ -1765,7 +1656,25 @@
         <p class="receipt-foot">The lender owns a chunk of the car until you've paid it off. They insure their chunk by making you insure all of it.</p>
       </div>
     </div>
-    <p class="beat-translation">That's about a phone bill every month, for the right to borrow. It doesn't appear on the loan paperwork because it isn't loan paperwork &mdash; it's the loan's <em>shadow</em>. If you're financing, you're insuring at full coverage. Always.</p>
+    <p class="beat-translation">If you're financing, you're insuring at full coverage. Always.</p>
+  </article>
+
+    <!-- Beat 2 — The compound interest primer (the signature mirror visual, empty below) -->
+  <article class="beat">
+    <div class="mirror-wrap">
+      <div class="mirror-caption">
+        <span class="mirror-title">Compound interest, shown both ways</span>
+      </div>
+      <div class="mirror-canvas">
+        <canvas id="mirrorCanvas" aria-label="A two-sided chart. The upper half shows compound growth — the curve you've seen in retirement ads. The lower half is empty and will fill in as the story progresses."></canvas>
+      </div>
+      <!--div class="mirror-axis-labels">
+        <span class="upper">&uarr; What gains compound to (the version they show you in retirement ads)</span>
+        <span class="lower">&darr; What costs compound to (the version no ad ever shows you)</span>
+      </div-->
+    </div>
+    <!--p class="beat-translation">Same math. Two different directions. The only difference is whether you find yourself in the driver's seat or along for the ride in the back seat.</p-->
+    <!--p class="beat-translation">If you've ever seen a retirement-account ad &mdash; <span class="mono-aside">"start at 25, retire a millionaire"</span> &mdash; that's the top half. The bottom half is what happens when the same force is making money from you, not for you.</p-->
   </article>
 
 </section>
@@ -1774,10 +1683,9 @@
      ACT V — The Tuesday That Didn't Happen
      The counterfactual climax. Same Tuesday. Different math.
 ══════════════════════════════════════ -->
-<section class="act act-3" id="act-3">
+<section class="act act-5" id="act-5">
 
   <div class="act-intro">
-    <span class="act-eyebrow">Act III &middot; The Tuesday That Didn't Happen</span>
     <h2 class="act-title">Same Tuesday. Different math.</h2>
     <p class="act-lede">Rewind to the parking lot. Jordan, thirty, freshly promoted, same hand-me-down sedan. This time, instead of pulling into the dealership, Jordan keeps driving. Pulls up Craigslist. Finds a clean four-year-old Corolla for <em>eight thousand dollars</em>. Buys it. In cash. Same car ad on the radio on the way home. Here's what happens to the math.</p>
   </div>
@@ -1845,10 +1753,9 @@
 
   <!-- Beat 16 — Jordan at 65 (the climax) -->
   <article class="beat">
-    <div class="mirror-wrap">
+    <div class="mirror-wrap"> 
       <div class="mirror-caption">
         <span class="mirror-title">Compound interest, finally pointed the other way</span>
-        <span class="mirror-act">Act III &middot; the flip</span>
       </div>
       <div class="mirror-canvas">
         <canvas id="mirrorCanvas3" aria-label="A compound growth curve — what Jordan's $946 a month compounds to at 7% over 35 years."></canvas>
@@ -1876,8 +1783,8 @@
 <section class="act" id="asterisk">
 
   <div class="act-intro visible">
-    <span class="act-eyebrow">Act IV &middot; About That Asterisk</span>
-    <h2 class="act-title">What &ldquo;well-qualified buyer&rdquo; actually means.</h2>
+    <span class="act-eyebrow">About That Asterisk</span>
+    <h2 class="act-title">Remember the $399 at the top?</h2>
   </div>
 
   <article class="beat">
@@ -1918,13 +1825,13 @@
           </li>
         </ul>
         <div class="receipt-total">
-          <span class="receipt-label">Miss any one &mdash; like the average buyer does</span>
-          <span class="receipt-value hidden">+ $388/mo</span>
+          <span class="receipt-label">What the average buyer actually pays</span>
+          <span class="receipt-value">$787/mo</span>
         </div>
-        <p class="receipt-foot">Multiply that gap by 69 months of payments: <strong>$26,772</strong> the brochure never had room to mention.</p>
+        <p class="receipt-foot">$787 &minus; $399 = $388/mo of asterisk. Over 69 months of payments, that's <strong>$26,772</strong> the brochure never had room to mention.</p>
       </div>
     </div>
-    <p class="beat-translation">The $399 ad isn't a lie. In development, it's what we'd call the <em>happy path</em> &mdash; the one scenario where every input is just right. The <strong>$787 average</strong> is what happens when even one or two of those conditions slip. The <strong>$1,000+/mo club</strong> is a handful of slips. <em>The number on the brochure is the number for someone else.</em></p>
+    <p class="beat-translation">The $399 ad isn't a lie. In development, its what we call the "happy path". To actually pay $399 you have to hit <strong>every single one</strong> of those conditions &mdash; right car, right credit, right down, right term. Miss any of them &mdash; which is what happens to the average buyer &mdash; and the number climbs to $787. Miss a few more, or pick a slightly nicer trim, or have a less-than-perfect credit score, and you're in the <strong>19% paying over $1,000/mo</strong>. Same dealership. Same Saturday. <em>The number on the brochure is the number for someone else.</em></p>
   </article>
 
 </section>
@@ -1932,19 +1839,15 @@
 <!-- ══════════════════════════════════════
      INTERACTIVE TOOL
 ══════════════════════════════════════ -->
-<section class="act act-5 tool-section" id="tool">
+<section class="act act-7 tool-section" id="tool">
 
   <div class="act-intro">
-    <span class="act-eyebrow">Act V &middot; Your Tuesday</span>
+    <span class="act-eyebrow">Act VII &middot; Your Tuesday</span>
     <h2 class="act-title">Jordan's numbers were the average. Yours aren't.</h2>
     <p class="act-lede">The defaults below are Jordan's exact Tuesday. The calculator runs the same math you just watched. Drag any slider &mdash; your car price, your APR, your retirement age &mdash; and watch the depreciation, the interest, and the alternate Tuesday redraw themselves. <em>Find your number.</em></p>
   </div>
 
-  <!-- Scenario summary — the headline outputs that respond to the inputs below -->
-  <div class="zone-header zone-output">
-    <span class="zone-tag">Your numbers</span>
-    <span class="zone-hint">these update as you adjust the inputs &darr;</span>
-  </div>
+  <!-- Scenario summary -->
   <div class="scenarios">
     <div class="scard scard-a">
       <div class="scard-tag">The Dealership <span class="tag-a">Tuesday</span></div>
@@ -1976,12 +1879,7 @@
   <!-- Layout: controls + charts -->
   <div class="tool-layout">
 
-    <aside class="controls" aria-label="Calculator inputs">
-
-      <div class="controls-header">
-        <span class="zone-tag input">Adjust</span>
-        <span class="zone-hint">your scenario, your numbers</span>
-      </div>
+    <aside class="controls">
 
       <div class="ctrl-section">
         <div class="section-head sh-a"><div class="dot dot-a"></div>The Dealership Tuesday (new)</div>
@@ -2084,7 +1982,7 @@
           <div class="leg-item"><div class="leg-swatch" style="background:var(--green)"></div>Used Car Value (B)</div>
           <div class="leg-item"><div class="leg-swatch" style="background:rgba(90,125,94,0.3);border-top:1px dashed var(--green)"></div>B's entry price</div>
         </div>
-        <div class="insight insight-a skeleton" id="dep-insight" aria-busy="true" aria-live="polite"></div>
+        <div class="insight insight-a" id="dep-insight">Loading...</div>
       </div>
 
       <div class="card">
@@ -2102,7 +2000,7 @@
         <div class="card-title">What the Perpetual Buyer Gives Up</div>
         <div class="card-sub" id="gap-sub">B invests the payment difference while both have loans. Once B's loan ends — and A rolls into a new one — B invests A's full payment amount.</div>
         <canvas id="gapChart" height="240"></canvas>
-        <div class="insight insight-b skeleton" id="gap-insight" aria-busy="true" aria-live="polite"></div>
+        <div class="insight insight-b" id="gap-insight">Loading...</div>
       </div>
 
     </div>
@@ -2500,14 +2398,6 @@
     $('si-age').textContent   = p.rage;
 
     const depAbsorbed = p.aPrice - d.aValueAtBAge;
-    // First population: drop the skeleton state on both insight panels
-    ['dep-insight', 'gap-insight'].forEach(id => {
-      const el = $(id);
-      if (el && el.classList.contains('skeleton')) {
-        el.classList.remove('skeleton');
-        el.removeAttribute('aria-busy');
-      }
-    });
     $('dep-insight').innerHTML =
       `In the ${p.bAge} years before B buys, the new car drops from <strong>${fmt(p.aPrice)}</strong> to roughly ` +
       `<strong class="c-red">${fmt(d.aValueAtBAge)}</strong> — a <strong class="c-red">${fmt(depAbsorbed)}</strong> loss ` +
@@ -2555,20 +2445,6 @@
   const fmtDollar  = n => '$' + n.toLocaleString('en-US');
   const fmtMonthly = n => '$' + n.toLocaleString('en-US') + '/mo';
   const fmtYearly  = n => '$' + n.toLocaleString('en-US') + '/yr';
-
-  /* Accessibility: every <input type="range"> needs an aria-label so screen
-     readers announce what the slider is. The calculator's sliders have a
-     visible label in a sibling `.field-name` span — read that and apply it
-     to the input. Self-maintaining: works for any future slider that follows
-     the same .field-row → input structure. */
-  function applyAriaLabels() {
-    document.querySelectorAll('input[type="range"]:not([aria-label])').forEach(input => {
-      const fieldRow = input.previousElementSibling;
-      if (!fieldRow || !fieldRow.classList.contains('field-row')) return;
-      const labelEl = fieldRow.querySelector('.field-name');
-      if (labelEl) input.setAttribute('aria-label', labelEl.textContent.trim());
-    });
-  }
 
   function initEditorial() {
     const beats = document.querySelectorAll('.beat, .act-intro');
@@ -2618,9 +2494,6 @@
   const SCENARIOS = {
     twoPhase: {
       yearsShown: 35,
-      /* Single-axis chart (positive only). Removes the mirror's empty lower
-         half and gives the upper curve the full vertical room. */
-      chartType: 'upperOnly',
       valueAt(months) {
         const rMo = 0.07 / 12, lump = 42326, monthly = 946, phaseEnd = 69;
         if (months <= phaseEnd) {
@@ -2686,6 +2559,7 @@
     const padL = 22, padR = 22, padT = 28, padB = 36;
     const innerW = W - padL - padR;
     const innerH = H - padT - padB;
+    const midY = padT + innerH / 2;
 
     const scenario = SCENARIOS[scenarioName] || SCENARIOS.continuous;
     const yearsShown = scenario.yearsShown;
@@ -2693,14 +2567,6 @@
     const DOLLAR_POINTS  = scenario.dataPoints;
     const ENDPOINT_LABEL = scenario.endpointLabel;
     const ENDPOINT_SUB   = scenario.endpointSub;
-
-    // Chart geometry. `mirror` (default): zero axis in the center, upper and
-    // lower halves symmetric. `upperOnly`: zero axis at the bottom, single
-    // positive vertical range. Per-scenario via scenario.chartType.
-    const isUpperOnly = scenario.chartType === 'upperOnly';
-    const midY = isUpperOnly ? (H - padB - 1) : (padT + innerH / 2);
-    const upperRange = isUpperOnly ? (innerH - 6) : (innerH / 2 - 4);
-    const yForSigned = (signed) => midY - signed * upperRange;
 
     // ── Zero axis ──
     ctx.save();
@@ -2712,6 +2578,9 @@
     ctx.lineTo(W - padR, midY);
     ctx.stroke();
     ctx.restore();
+
+    // Helper: vertical position for a value 0..1, signed
+    const yForSigned = (signed) => midY - signed * (innerH / 2 - 4);
 
     // ── UPPER CURVE: compound growth (steel teal) ──
     // Sample the scenario's value function across the time span and normalize
@@ -2743,7 +2612,7 @@
     ctx.restore();
 
     // ── LOWER CURVE: reverse-compounding loss ──
-    if (lossFraction > 0 && !isUpperOnly) {
+    if (lossFraction > 0) {
       const cut = Math.floor(upperNorm.length * lossFraction);
       ctx.save();
       ctx.strokeStyle = '#2a3a5a';
@@ -2765,7 +2634,7 @@
     }
 
     // ── Ghost lower outline (primer state, when lower hasn't filled yet) ──
-    if (lossFraction < 1 && !flipped && !isUpperOnly) {
+    if (lossFraction < 1 && !flipped) {
       ctx.save();
       ctx.strokeStyle = 'rgba(42,58,90,0.45)';
       ctx.lineWidth = 1.25;
@@ -2794,9 +2663,7 @@
       const x = padL + (year / yearsShown) * innerW;
       ctx.beginPath();
       ctx.moveTo(x, midY - 4);
-      // In upperOnly mode the zero axis sits at the chart bottom, so the tick
-      // extends only upward to stay inside the chart frame.
-      ctx.lineTo(x, isUpperOnly ? midY : midY + 4);
+      ctx.lineTo(x, midY + 4);
       ctx.stroke();
       let label;
       if (year === 0) label = 'now';
@@ -2943,7 +2810,7 @@
     }
 
     // ── Loss endpoint: −$X callout for filled lower curve (Act IV reveal in main) ──
-    if (lossFraction >= 1 && !isUpperOnly) {
+    if (lossFraction >= 1) {
       const lastX = padL + innerW;
       const lastY = yForSigned(-upperNorm[upperNorm.length - 1] * 0.92);
       ctx.save();
@@ -3213,7 +3080,6 @@
   ══════════════════════════════════════ */
   document.addEventListener('DOMContentLoaded', () => {
     initCharts();
-    applyAriaLabels();
     initEditorial();
     drawAllMirrors();
     watchMirrorAnimations();
