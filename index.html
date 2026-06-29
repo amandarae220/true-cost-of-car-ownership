@@ -1309,10 +1309,10 @@
     }
 
     /* ════════════════════════════════════
-       TOOL SECTION (Act VII)
+       TOOL SECTION (Act V — the interactive calculator)
        Compose with .act styling for headings; keep scroll-margin and grid here.
     ════════════════════════════════════ */
-    .act-7 {
+    .act-5 {
       scroll-margin-top: 3.5rem;
       padding-bottom: 5rem;
     }
@@ -1388,9 +1388,57 @@
     }
 
     /* Controls */
+    /* ════════════════════════════════════
+       INPUT / OUTPUT HIERARCHY — signal which zone is yours to control
+       and which zone is the math's response. Subtle ochre tint on the input
+       column, mono "Adjust" / "Your numbers" tags above each zone.
+    ════════════════════════════════════ */
+    .zone-header {
+      max-width: 1240px;
+      margin: 0 auto 0.85rem;
+      display: flex;
+      align-items: baseline;
+      gap: 0.85rem;
+      flex-wrap: wrap;
+    }
+    .zone-tag {
+      font-family: 'IBM Plex Mono', ui-monospace, monospace;
+      font-size: 0.7rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      padding: 0.28rem 0.65rem;
+      border-radius: 2px;
+      color: var(--for-you);
+      background: rgba(58,115,136,0.10);
+      border: 1px solid rgba(58,115,136,0.30);
+    }
+    .zone-tag.input {
+      color: var(--hidden);
+      background: rgba(156,120,32,0.10);
+      border-color: rgba(156,120,32,0.35);
+    }
+    .zone-hint {
+      font-family: 'IBM Plex Mono', ui-monospace, monospace;
+      font-size: 0.72rem;
+      color: var(--muted);
+      letter-spacing: 0.02em;
+    }
+    .controls-header {
+      display: flex;
+      align-items: baseline;
+      gap: 0.65rem;
+      flex-wrap: wrap;
+      margin-bottom: 1.1rem;
+      padding-bottom: 0.85rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .controls-header .zone-hint { font-size: 0.7rem; }
+
     .controls {
-      background: var(--surface);
+      background: rgba(156,120,32,0.05);   /* faint ochre tint — input zone */
       border: 1px solid var(--border);
+      border-left: 3px solid rgba(156,120,32,0.55);
       border-radius: 12px;
       padding: 1.375rem;
       position: sticky;
@@ -1442,7 +1490,31 @@
     .card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1.375rem; }
     .card-title { font-size: 0.95rem; font-weight: 700; margin-bottom: 0.2rem; }
     .card-sub   { font-size: 0.77rem; color: var(--muted); margin-bottom: 1.1rem; line-height: 1.5; }
-    .insight { margin-top: 1rem; padding: 0.9rem 1.1rem; border-radius: 8px; font-size: 0.82rem; color: var(--muted); line-height: 1.65; }
+    .insight { margin-top: 1rem; padding: 0.9rem 1.1rem; border-radius: 8px; font-size: 0.82rem; color: var(--muted); line-height: 1.65; min-height: 3.2em; }
+    /* Skeleton state — shown before first refresh() populates the insight text.
+       Three pseudo "lines" of shimmering placeholder. Avoids the brittle word
+       "Loading..." and gives a sense that real content is incoming. */
+    .insight.skeleton { color: transparent; user-select: none; padding: 0.9rem 1.1rem; }
+    .insight.skeleton::before,
+    .insight.skeleton::after {
+      content: "";
+      display: block;
+      height: 0.65em;
+      border-radius: 2px;
+      background: linear-gradient(90deg, var(--border) 0%, var(--surf2) 50%, var(--border) 100%);
+      background-size: 200% 100%;
+      animation: skeleton-shimmer 1.4s ease-in-out infinite;
+    }
+    .insight.skeleton::before { width: 92%; margin-bottom: 0.45em; }
+    .insight.skeleton::after  { width: 64%; }
+    @keyframes skeleton-shimmer {
+      0%   { background-position: 100% 0; }
+      100% { background-position: -100% 0; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .insight.skeleton::before,
+      .insight.skeleton::after { animation: none; opacity: 0.5; }
+    }
     .insight-a { background: rgba(42,58,90,0.10); border: 1px solid rgba(42,58,90,0.30); }
     .insight-b { background: rgba(58,115,136,0.10); border: 1px solid rgba(58,115,136,0.30); }
     .insight strong { color: var(--text); }
@@ -1450,7 +1522,10 @@
     .leg-item { display: flex; align-items: center; gap: 0.4rem; font-size: 0.76rem; color: var(--muted); }
     .leg-swatch { width: 20px; height: 3px; border-radius: 2px; flex-shrink: 0; }
 
-    /* Responsive */
+    /* ════════════════════════════════════
+       RESPONSIVE — mobile is treated as a first-class layout, not a fallback.
+       Breakpoints map to layout intent, not to specific device sizes.
+    ════════════════════════════════════ */
     @media (max-width: 1000px) {
       .tool-layout { grid-template-columns: 1fr; }
       .controls { position: static; max-height: none; }
@@ -1458,7 +1533,27 @@
     @media (max-width: 700px) {
       .scenarios { grid-template-columns: 1fr; }
       .scenario-divider { display: none; }
-      .ed-beat { padding: 4rem 1.25rem; }
+    }
+    /* ── Phone-narrow tweaks: ~480px and below ── */
+    @media (max-width: 520px) {
+      /* Mirror chart axis labels stack to one column so long captions stay
+         readable instead of being squeezed into 50% of the width. */
+      .mirror-axis-labels { grid-template-columns: 1fr; gap: 0.35rem; }
+      /* Series nav allows wrapping on tight screens without overflowing. */
+      .series-nav-inner { gap: 0.6rem; padding: 0.55rem 1rem; }
+      .series-parts { gap: 0.4rem; }
+      .series-part { font-size: 0.66rem; padding: 0.25rem 0.6rem; }
+      /* Receipt labels can wrap on long lines instead of clipping the value. */
+      .receipt-line { flex-wrap: wrap; row-gap: 0.1rem; }
+      .receipt-label { white-space: normal; }
+      /* Larger slider thumb hit target on touch. */
+      input[type="range"]::-webkit-slider-thumb { width: 18px; height: 18px; }
+      input[type="range"]::-moz-range-thumb     { width: 18px; height: 18px; }
+      /* Tool section padding tightens. */
+      .act-5 { padding-left: 1rem; padding-right: 1rem; }
+      .controls { padding: 1.1rem; }
+      /* The "Adjust" / "Your numbers" zone header tags wrap cleanly. */
+      .zone-header { margin-bottom: 0.6rem; }
     }
   </style>
 </head>
@@ -1678,10 +1773,10 @@
      ACT V — The Tuesday That Didn't Happen
      The counterfactual climax. Same Tuesday. Different math.
 ══════════════════════════════════════ -->
-<section class="act act-5" id="act-5">
+<section class="act act-3" id="act-3">
 
   <div class="act-intro">
-    <span class="act-eyebrow">Act V &middot; The Tuesday That Didn't Happen</span>
+    <span class="act-eyebrow">Act III &middot; The Tuesday That Didn't Happen</span>
     <h2 class="act-title">Same Tuesday. Different math.</h2>
     <p class="act-lede">Rewind to the parking lot. Jordan, thirty, freshly promoted, same hand-me-down sedan. This time, instead of pulling into the dealership, Jordan keeps driving. Pulls up Craigslist. Finds a clean four-year-old Corolla for <em>eight thousand dollars</em>. Buys it. In cash. Same car ad on the radio on the way home. Here's what happens to the math.</p>
   </div>
@@ -1752,7 +1847,7 @@
     <div class="mirror-wrap">
       <div class="mirror-caption">
         <span class="mirror-title">Compound interest, finally pointed the other way</span>
-        <span class="mirror-act">Act V &middot; the flip</span>
+        <span class="mirror-act">Act III &middot; the flip</span>
       </div>
       <div class="mirror-canvas">
         <canvas id="mirrorCanvas3" aria-label="A compound growth curve — what Jordan's $946 a month compounds to at 7% over 35 years."></canvas>
@@ -1780,8 +1875,8 @@
 <section class="act" id="asterisk">
 
   <div class="act-intro visible">
-    <span class="act-eyebrow">About That Asterisk</span>
-    <h2 class="act-title">Remember the $399 at the top?</h2>
+    <span class="act-eyebrow">Act IV &middot; About That Asterisk</span>
+    <h2 class="act-title">What &ldquo;well-qualified buyer&rdquo; actually means.</h2>
   </div>
 
   <article class="beat">
@@ -1822,13 +1917,13 @@
           </li>
         </ul>
         <div class="receipt-total">
-          <span class="receipt-label">What the average buyer actually pays</span>
-          <span class="receipt-value">$787/mo</span>
+          <span class="receipt-label">Miss any one &mdash; like the average buyer does</span>
+          <span class="receipt-value hidden">+ $388/mo</span>
         </div>
-        <p class="receipt-foot">$787 &minus; $399 = $388/mo of asterisk. Over 69 months of payments, that's <strong>$26,772</strong> the brochure never had room to mention.</p>
+        <p class="receipt-foot">Multiply that gap by 69 months of payments: <strong>$26,772</strong> the brochure never had room to mention.</p>
       </div>
     </div>
-    <p class="beat-translation">The $399 ad isn't a lie. In development, its what we call the "happy path". To actually pay $399 you have to hit <strong>every single one</strong> of those conditions &mdash; right car, right credit, right down, right term. Miss any of them &mdash; which is what happens to the average buyer &mdash; and the number climbs to $787. Miss a few more, or pick a slightly nicer trim, or have a less-than-perfect credit score, and you're in the <strong>19% paying over $1,000/mo</strong>. Same dealership. Same Saturday. <em>The number on the brochure is the number for someone else.</em></p>
+    <p class="beat-translation">The $399 ad isn't a lie. In development, it's what we'd call the <em>happy path</em> &mdash; the one scenario where every input is just right. The <strong>$787 average</strong> is what happens when even one or two of those conditions slip. The <strong>$1,000+/mo club</strong> is a handful of slips. <em>The number on the brochure is the number for someone else.</em></p>
   </article>
 
 </section>
@@ -1836,15 +1931,19 @@
 <!-- ══════════════════════════════════════
      INTERACTIVE TOOL
 ══════════════════════════════════════ -->
-<section class="act act-7 tool-section" id="tool">
+<section class="act act-5 tool-section" id="tool">
 
   <div class="act-intro">
-    <span class="act-eyebrow">Act VII &middot; Your Tuesday</span>
+    <span class="act-eyebrow">Act V &middot; Your Tuesday</span>
     <h2 class="act-title">Jordan's numbers were the average. Yours aren't.</h2>
     <p class="act-lede">The defaults below are Jordan's exact Tuesday. The calculator runs the same math you just watched. Drag any slider &mdash; your car price, your APR, your retirement age &mdash; and watch the depreciation, the interest, and the alternate Tuesday redraw themselves. <em>Find your number.</em></p>
   </div>
 
-  <!-- Scenario summary -->
+  <!-- Scenario summary — the headline outputs that respond to the inputs below -->
+  <div class="zone-header zone-output">
+    <span class="zone-tag">Your numbers</span>
+    <span class="zone-hint">these update as you adjust the inputs &darr;</span>
+  </div>
   <div class="scenarios">
     <div class="scard scard-a">
       <div class="scard-tag">The Dealership <span class="tag-a">Tuesday</span></div>
@@ -1876,7 +1975,12 @@
   <!-- Layout: controls + charts -->
   <div class="tool-layout">
 
-    <aside class="controls">
+    <aside class="controls" aria-label="Calculator inputs">
+
+      <div class="controls-header">
+        <span class="zone-tag input">Adjust</span>
+        <span class="zone-hint">your scenario, your numbers</span>
+      </div>
 
       <div class="ctrl-section">
         <div class="section-head sh-a"><div class="dot dot-a"></div>The Dealership Tuesday (new)</div>
@@ -1979,7 +2083,7 @@
           <div class="leg-item"><div class="leg-swatch" style="background:var(--green)"></div>Used Car Value (B)</div>
           <div class="leg-item"><div class="leg-swatch" style="background:rgba(90,125,94,0.3);border-top:1px dashed var(--green)"></div>B's entry price</div>
         </div>
-        <div class="insight insight-a" id="dep-insight">Loading...</div>
+        <div class="insight insight-a skeleton" id="dep-insight" aria-busy="true" aria-live="polite"></div>
       </div>
 
       <div class="card">
@@ -1997,7 +2101,7 @@
         <div class="card-title">What the Perpetual Buyer Gives Up</div>
         <div class="card-sub" id="gap-sub">B invests the payment difference while both have loans. Once B's loan ends — and A rolls into a new one — B invests A's full payment amount.</div>
         <canvas id="gapChart" height="240"></canvas>
-        <div class="insight insight-b" id="gap-insight">Loading...</div>
+        <div class="insight insight-b skeleton" id="gap-insight" aria-busy="true" aria-live="polite"></div>
       </div>
 
     </div>
@@ -2395,6 +2499,14 @@
     $('si-age').textContent   = p.rage;
 
     const depAbsorbed = p.aPrice - d.aValueAtBAge;
+    // First population: drop the skeleton state on both insight panels
+    ['dep-insight', 'gap-insight'].forEach(id => {
+      const el = $(id);
+      if (el && el.classList.contains('skeleton')) {
+        el.classList.remove('skeleton');
+        el.removeAttribute('aria-busy');
+      }
+    });
     $('dep-insight').innerHTML =
       `In the ${p.bAge} years before B buys, the new car drops from <strong>${fmt(p.aPrice)}</strong> to roughly ` +
       `<strong class="c-red">${fmt(d.aValueAtBAge)}</strong> — a <strong class="c-red">${fmt(depAbsorbed)}</strong> loss ` +
@@ -2442,6 +2554,20 @@
   const fmtDollar  = n => '$' + n.toLocaleString('en-US');
   const fmtMonthly = n => '$' + n.toLocaleString('en-US') + '/mo';
   const fmtYearly  = n => '$' + n.toLocaleString('en-US') + '/yr';
+
+  /* Accessibility: every <input type="range"> needs an aria-label so screen
+     readers announce what the slider is. The calculator's sliders have a
+     visible label in a sibling `.field-name` span — read that and apply it
+     to the input. Self-maintaining: works for any future slider that follows
+     the same .field-row → input structure. */
+  function applyAriaLabels() {
+    document.querySelectorAll('input[type="range"]:not([aria-label])').forEach(input => {
+      const fieldRow = input.previousElementSibling;
+      if (!fieldRow || !fieldRow.classList.contains('field-row')) return;
+      const labelEl = fieldRow.querySelector('.field-name');
+      if (labelEl) input.setAttribute('aria-label', labelEl.textContent.trim());
+    });
+  }
 
   function initEditorial() {
     const beats = document.querySelectorAll('.beat, .act-intro');
@@ -3077,6 +3203,7 @@
   ══════════════════════════════════════ */
   document.addEventListener('DOMContentLoaded', () => {
     initCharts();
+    applyAriaLabels();
     initEditorial();
     drawAllMirrors();
     watchMirrorAnimations();
