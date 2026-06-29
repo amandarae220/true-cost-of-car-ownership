@@ -1575,7 +1575,8 @@
         <p class="receipt-foot">Numbers vary by state, but the pattern doesn't.</p>
       </div>
     </div>
-    <p class="beat-translation">The sticker isn't the price &mdash; it's the <em>starting point</em>. By the time the pen touches the paper, Jordan has already added almost <strong>$4,700</strong> nobody printed on the brochure. That's a tip you never agreed to.</p>
+    <p class="beat-translation">The sticker isn't the total price &mdash; it's the <em>starting point</em>. 
+      Jordan has added almost <strong>$4,700</strong> not shown on the brochure.</p>
   </article>
 
   <!-- Beat 4 — Monthly payment (with the NPR $1k-club stat as a standalone aside) -->
@@ -1827,7 +1828,7 @@
         <p class="receipt-foot">$787 &minus; $399 = $388/mo of asterisk. Over 69 months of payments, that's <strong>$26,772</strong> the brochure never had room to mention.</p>
       </div>
     </div>
-    <p class="beat-translation">The $399 ad isn't a lie. It's an <em>asterisk</em>. To actually pay $399 you have to hit <strong>every single one</strong> of those conditions &mdash; right car, right credit, right down, right term. Miss any of them &mdash; which is what happens to the average buyer &mdash; and the number climbs to $787. Miss a few more, or pick a slightly nicer trim, or have a less-than-perfect credit score, and you're in the <strong>19% paying over $1,000/mo</strong>. Same dealership. Same Saturday. <em>The number on the brochure is the number for someone else.</em></p>
+    <p class="beat-translation">The $399 ad isn't a lie. In development, its what we call the "happy path". To actually pay $399 you have to hit <strong>every single one</strong> of those conditions &mdash; right car, right credit, right down, right term. Miss any of them &mdash; which is what happens to the average buyer &mdash; and the number climbs to $787. Miss a few more, or pick a slightly nicer trim, or have a less-than-perfect credit score, and you're in the <strong>19% paying over $1,000/mo</strong>. Same dealership. Same Saturday. <em>The number on the brochure is the number for someone else.</em></p>
   </article>
 
 </section>
@@ -2491,13 +2492,26 @@
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     ctx.clearRect(0, 0, W, H);
 
-    // Generous bottom padding leaves room for the year axis labels outside
-    // the chart area, so they never collide with the lower curve.
-    const padL = 36, padR = 16, padT = 18, padB = 32;
+    // Padding leaves room for the year axis labels below and a small left
+    // margin for the $0 anchor. Side scale labels removed — the HTML
+    // .mirror-axis-labels below the chart explains gains vs. losses.
+    const padL = 22, padR = 22, padT = 28, padB = 32;
     const innerW = W - padL - padR;
     const innerH = H - padT - padB;
     const midY = padT + innerH / 2;
     const yearsShown = 35;
+
+    // Data points keyed to the actual counterfactual math:
+    // $42,326 upfront lump (50326 - 8000) + $946/mo, compounded monthly at 7%.
+    // These tie the curve to specific numbers the reader can recognize from
+    // the finale callout below the chart.
+    const DOLLAR_POINTS = [
+      { yr: 10, label: '~$250k' },
+      { yr: 20, label: '~$660k' },
+      { yr: 30, label: '~$1.5M' },
+    ];
+    const ENDPOINT_LABEL = '$2.16M';
+    const ENDPOINT_SUB   = 'at age 65';
 
     // ── Zero axis ──
     ctx.save();
@@ -2565,9 +2579,9 @@
     // ── Ghost lower outline (primer state, when lower hasn't filled yet) ──
     if (lossFraction < 1 && !flipped) {
       ctx.save();
-      ctx.strokeStyle = 'rgba(42,58,90,0.18)';
-      ctx.lineWidth = 1;
-      ctx.setLineDash([2, 5]);
+      ctx.strokeStyle = 'rgba(42,58,90,0.45)';
+      ctx.lineWidth = 1.25;
+      ctx.setLineDash([3, 4]);
       ctx.beginPath();
       const startI = Math.floor(upperNorm.length * lossFraction);
       for (let i = startI; i < upperNorm.length; i++) {
@@ -2580,7 +2594,7 @@
       ctx.restore();
     }
 
-    // ── X-AXIS: year markers (always shown) ──
+    // ── X-AXIS: year markers ──
     ctx.save();
     ctx.fillStyle = 'rgba(110,102,90,0.95)';
     ctx.strokeStyle = 'rgba(110,102,90,0.5)';
@@ -2591,12 +2605,10 @@
     const yearTicks = [0, 10, 20, 30, 35];
     yearTicks.forEach((year, idx) => {
       const x = padL + (year / yearsShown) * innerW;
-      // Tick mark across the zero axis
       ctx.beginPath();
       ctx.moveTo(x, midY - 4);
       ctx.lineTo(x, midY + 4);
       ctx.stroke();
-      // Year label below the chart
       let label;
       if (year === 0) label = 'now';
       else if (year === 35) label = '+35 yrs · age 65';
@@ -2615,60 +2627,74 @@
     ctx.font = '500 10px "IBM Plex Mono", ui-monospace, monospace';
     ctx.textAlign = 'right';
     ctx.textBaseline = 'middle';
-    ctx.fillText('$0', padL - 6, midY);
-    // Upper scale anchor — labels the "ceiling" of the upper region
-    if (flipped) {
-      ctx.fillStyle = 'rgba(58,115,136,0.95)';
-      ctx.fillText('$2.4M', padL - 6, padT + 4);
-    } else {
-      ctx.fillStyle = 'rgba(110,102,90,0.65)';
-      ctx.fillText('gains', padL - 6, padT + 4);
-    }
-    // Lower scale anchor — only shown if lower curve is populated
-    if (lossFraction > 0) {
-      ctx.fillStyle = 'rgba(42,58,90,0.95)';
-      ctx.fillText('−$2.4M', padL - 6, H - padB - 4);
-    } else if (!flipped) {
-      ctx.fillStyle = 'rgba(110,102,90,0.55)';
-      ctx.fillText('losses', padL - 6, H - padB - 4);
-    }
+    ctx.fillText('$0', padL - 4, midY);
     ctx.restore();
 
-    // ── Endpoint annotation: $2.16M callout for flipped (Act V finale) ──
-    if (flipped) {
+    // ── DATA POINTS along the upper curve ──
+    // Dashed guide lines from the zero axis up to a dot on the curve, with
+    // a dollar label above each dot. Anchors abstract growth to real numbers.
+    ctx.save();
+    DOLLAR_POINTS.forEach(({ yr, label }) => {
+      const t_norm = yr / yearsShown;
+      const idx = Math.round(t_norm * (upperNorm.length - 1));
+      const v = upperNorm[idx];
+      const x = padL + t_norm * innerW;
+      const y = yForSigned(v * 0.92);
+      // Dashed guide
+      ctx.strokeStyle = 'rgba(58,115,136,0.30)';
+      ctx.lineWidth = 1;
+      ctx.setLineDash([2, 3]);
+      ctx.beginPath();
+      ctx.moveTo(x, midY);
+      ctx.lineTo(x, y);
+      ctx.stroke();
+      // Dot
+      ctx.setLineDash([]);
+      ctx.fillStyle = '#3a7388';
+      ctx.beginPath();
+      ctx.arc(x, y, 3, 0, Math.PI * 2);
+      ctx.fill();
+      // Dollar label above the dot
+      ctx.fillStyle = '#3a7388';
+      ctx.font = '500 10.5px "IBM Plex Mono", ui-monospace, monospace';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'bottom';
+      ctx.fillText(label, x, y - 7);
+    });
+    ctx.restore();
+
+    // ── Endpoint annotation: $2.16M / at age 65 (both states) ──
+    {
       const lastX = padL + innerW;
       const lastY = yForSigned(upperNorm[upperNorm.length - 1] * 0.92);
       ctx.save();
-      // Dot
-      ctx.fillStyle = '#3a7388';
-      ctx.beginPath();
-      ctx.arc(lastX - 2, lastY, 5, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.strokeStyle = 'rgba(58,115,136,0.35)';
-      ctx.lineWidth = 1.5;
-      ctx.beginPath();
-      ctx.arc(lastX - 2, lastY, 10, 0, Math.PI * 2);
-      ctx.stroke();
-      // Inline callout
+      // Flipped variant: emphasis dot + ring for finale
+      if (flipped) {
+        ctx.fillStyle = '#3a7388';
+        ctx.beginPath();
+        ctx.arc(lastX, lastY, 5, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = 'rgba(58,115,136,0.35)';
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.arc(lastX, lastY, 10, 0, Math.PI * 2);
+        ctx.stroke();
+      } else {
+        // Primer: small dot only
+        ctx.fillStyle = '#3a7388';
+        ctx.beginPath();
+        ctx.arc(lastX, lastY, 3, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      // Dollar callout — right-aligned so it doesn't run off canvas
       ctx.fillStyle = '#3a7388';
       ctx.textAlign = 'right';
       ctx.textBaseline = 'alphabetic';
-      ctx.font = '700 18px "Oswald", system-ui, sans-serif';
-      ctx.fillText('$2.16M', lastX - 16, lastY - 12);
+      ctx.font = '700 17px "Oswald", system-ui, sans-serif';
+      ctx.fillText(ENDPOINT_LABEL, lastX - 14, lastY - 12);
       ctx.font = '500 9.5px "IBM Plex Mono", ui-monospace, monospace';
       ctx.fillStyle = 'rgba(110,102,90,0.95)';
-      ctx.fillText('at age 65', lastX - 16, lastY + 2);
-      ctx.restore();
-    } else {
-      // Primer state: curve direction label, no specific dollar yet
-      const lastX = padL + innerW;
-      const lastY = yForSigned(upperNorm[upperNorm.length - 1] * 0.92);
-      ctx.save();
-      ctx.fillStyle = 'rgba(58,115,136,0.78)';
-      ctx.font = '500 10px "IBM Plex Mono", ui-monospace, monospace';
-      ctx.textAlign = 'right';
-      ctx.textBaseline = 'alphabetic';
-      ctx.fillText('compound →', lastX - 4, lastY - 8);
+      ctx.fillText(ENDPOINT_SUB, lastX - 14, lastY + 2);
       ctx.restore();
     }
 
