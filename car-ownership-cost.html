@@ -1487,8 +1487,8 @@
 
   <div class="act-intro">
     <span class="act-eyebrow">Act I &middot; The Pitch</span>
-    <h2 class="act-title">There are two halves to the math.</h2>
-    <p class="act-lede">Every car gets sold the same way. Not the make. Not the model. The <em>math</em>. There are two halves to it &mdash; and the dealership only tells you one of them. Most people don't notice the other half is missing until they're already in the driver's seat. We're going to walk through both, in plain language, with the calculator at the end. Pour a coffee.</p>
+    <h2 class="act-title">How to tell if you're buying a car or just a car payment</h2>
+    <p class="act-lede">The tiny asterisk next to an advertised car payment hints at a hidden truth. It's left up to the buyer to do the calculations (most don't). So I did them for you. Pull up a chair and pour a coffee.</p>
   </div>
 
   <!-- Beat 1 — The brochure (standalone artifact: introduces the device) -->
@@ -1499,7 +1499,7 @@
       <p class="brochure-headline">A new ride. Easy financing. You deserve this.</p>
       <p class="brochure-sub">* For well-qualified buyers. See dealer for details.</p>
     </div>
-    <p class="beat-translation">Every car ad in America says some version of this. A small monthly number. A friendly verb. An asterisk that nobody reads. <strong>This whole piece is about what's on the other side of that asterisk.</strong></p>
+    <p class="beat-translation">Every car ad in America says some version of this. A small monthly number. A friendly verb. An asterisk small enough to completely gloss over. <strong>This visualization is about what's on the other side of that asterisk.</strong></p>
   </article>
 
   <!-- Beat 2 — The compound interest primer (the signature mirror visual, empty below) -->
@@ -1517,7 +1517,8 @@
         <span class="lower">&darr; What costs compound to (the version no ad ever shows you)</span>
       </div>
     </div>
-    <p class="beat-translation">Same math. Same shape. The only difference is which side of the loan you're standing on. If you've ever seen a retirement-account ad &mdash; <span class="mono-aside">"start at 25, retire a millionaire"</span> &mdash; that's the top half. The bottom half is what happens when the same force is pointed at you. Watch what gets put there.</p>
+    <p class="beat-translation">Same math. Two different directions. The only difference is whether you find yourself in the driver's seat or along for the ride in the back seat.</p>
+    <p class="beat-translation">If you've ever seen a retirement-account ad &mdash; <span class="mono-aside">"start at 25, retire a millionaire"</span> &mdash; that's the top half. The bottom half is what happens when the same force is making money from you, not for you.</p>
   </article>
 
 </section>
@@ -2490,13 +2491,15 @@
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     ctx.clearRect(0, 0, W, H);
 
-    const padL = 12, padR = 12, padT = 12, padB = 12;
+    // Generous bottom padding leaves room for the year axis labels outside
+    // the chart area, so they never collide with the lower curve.
+    const padL = 36, padR = 16, padT = 18, padB = 32;
     const innerW = W - padL - padR;
     const innerH = H - padT - padB;
     const midY = padT + innerH / 2;
     const yearsShown = 35;
 
-    // Zero axis — restrained warm gray dashed
+    // ── Zero axis ──
     ctx.save();
     ctx.strokeStyle = 'rgba(110,102,90,0.45)';
     ctx.lineWidth = 1;
@@ -2511,7 +2514,6 @@
     const yForSigned = (signed) => midY - signed * (innerH / 2 - 4);
 
     // ── UPPER CURVE: compound growth (steel teal) ──
-    // y = (1.07^t - 1) / scale, normalized to [0..1] across yearsShown
     const upperVals = [];
     for (let i = 0; i <= 120; i++) {
       const t = (i / 120) * yearsShown;
@@ -2531,7 +2533,6 @@
       i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
     });
     ctx.stroke();
-    // Fill under upper curve, faint
     ctx.lineTo(W - padR, midY);
     ctx.lineTo(padL, midY);
     ctx.closePath();
@@ -2539,8 +2540,7 @@
     ctx.fill();
     ctx.restore();
 
-    // ── LOWER CURVE: reverse-compounding loss (deep ink navy) ──
-    // Only drawn up to lossFraction (0 = empty primer, 1 = fully filled).
+    // ── LOWER CURVE: reverse-compounding loss ──
     if (lossFraction > 0) {
       const cut = Math.floor(upperNorm.length * lossFraction);
       ctx.save();
@@ -2562,9 +2562,7 @@
       ctx.restore();
     }
 
-    // ── Ghost lower outline (so the empty lower half still suggests symmetry) ──
-    // Suppressed in the flipped variant — Act V's whole point is that the
-    // dealership's version never happened, so nothing belongs below zero.
+    // ── Ghost lower outline (primer state, when lower hasn't filled yet) ──
     if (lossFraction < 1 && !flipped) {
       ctx.save();
       ctx.strokeStyle = 'rgba(42,58,90,0.18)';
@@ -2582,11 +2580,66 @@
       ctx.restore();
     }
 
-    // ── Endpoint dot for the flipped variant (Act V) — anchors the big finale number ──
+    // ── X-AXIS: year markers (always shown) ──
+    ctx.save();
+    ctx.fillStyle = 'rgba(110,102,90,0.95)';
+    ctx.strokeStyle = 'rgba(110,102,90,0.5)';
+    ctx.lineWidth = 1;
+    ctx.font = '500 10px "IBM Plex Mono", ui-monospace, monospace';
+    ctx.textBaseline = 'top';
+    ctx.setLineDash([]);
+    const yearTicks = [0, 10, 20, 30, 35];
+    yearTicks.forEach((year, idx) => {
+      const x = padL + (year / yearsShown) * innerW;
+      // Tick mark across the zero axis
+      ctx.beginPath();
+      ctx.moveTo(x, midY - 4);
+      ctx.lineTo(x, midY + 4);
+      ctx.stroke();
+      // Year label below the chart
+      let label;
+      if (year === 0) label = 'now';
+      else if (year === 35) label = '+35 yrs · age 65';
+      else label = '+' + year;
+      if (idx === 0) ctx.textAlign = 'left';
+      else if (idx === yearTicks.length - 1) ctx.textAlign = 'right';
+      else ctx.textAlign = 'center';
+      const labelX = idx === 0 ? padL : idx === yearTicks.length - 1 ? W - padR : x;
+      ctx.fillText(label, labelX, H - padB + 8);
+    });
+    ctx.restore();
+
+    // ── Y-AXIS: zero anchor on the left ──
+    ctx.save();
+    ctx.fillStyle = 'rgba(110,102,90,0.95)';
+    ctx.font = '500 10px "IBM Plex Mono", ui-monospace, monospace';
+    ctx.textAlign = 'right';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('$0', padL - 6, midY);
+    // Upper scale anchor — labels the "ceiling" of the upper region
+    if (flipped) {
+      ctx.fillStyle = 'rgba(58,115,136,0.95)';
+      ctx.fillText('$2.4M', padL - 6, padT + 4);
+    } else {
+      ctx.fillStyle = 'rgba(110,102,90,0.65)';
+      ctx.fillText('gains', padL - 6, padT + 4);
+    }
+    // Lower scale anchor — only shown if lower curve is populated
+    if (lossFraction > 0) {
+      ctx.fillStyle = 'rgba(42,58,90,0.95)';
+      ctx.fillText('−$2.4M', padL - 6, H - padB - 4);
+    } else if (!flipped) {
+      ctx.fillStyle = 'rgba(110,102,90,0.55)';
+      ctx.fillText('losses', padL - 6, H - padB - 4);
+    }
+    ctx.restore();
+
+    // ── Endpoint annotation: $2.16M callout for flipped (Act V finale) ──
     if (flipped) {
       const lastX = padL + innerW;
       const lastY = yForSigned(upperNorm[upperNorm.length - 1] * 0.92);
       ctx.save();
+      // Dot
       ctx.fillStyle = '#3a7388';
       ctx.beginPath();
       ctx.arc(lastX - 2, lastY, 5, 0, Math.PI * 2);
@@ -2596,6 +2649,46 @@
       ctx.beginPath();
       ctx.arc(lastX - 2, lastY, 10, 0, Math.PI * 2);
       ctx.stroke();
+      // Inline callout
+      ctx.fillStyle = '#3a7388';
+      ctx.textAlign = 'right';
+      ctx.textBaseline = 'alphabetic';
+      ctx.font = '700 18px "Oswald", system-ui, sans-serif';
+      ctx.fillText('$2.16M', lastX - 16, lastY - 12);
+      ctx.font = '500 9.5px "IBM Plex Mono", ui-monospace, monospace';
+      ctx.fillStyle = 'rgba(110,102,90,0.95)';
+      ctx.fillText('at age 65', lastX - 16, lastY + 2);
+      ctx.restore();
+    } else {
+      // Primer state: curve direction label, no specific dollar yet
+      const lastX = padL + innerW;
+      const lastY = yForSigned(upperNorm[upperNorm.length - 1] * 0.92);
+      ctx.save();
+      ctx.fillStyle = 'rgba(58,115,136,0.78)';
+      ctx.font = '500 10px "IBM Plex Mono", ui-monospace, monospace';
+      ctx.textAlign = 'right';
+      ctx.textBaseline = 'alphabetic';
+      ctx.fillText('compound →', lastX - 4, lastY - 8);
+      ctx.restore();
+    }
+
+    // ── Loss endpoint: −$X callout for filled lower curve (Act IV reveal in main) ──
+    if (lossFraction >= 1) {
+      const lastX = padL + innerW;
+      const lastY = yForSigned(-upperNorm[upperNorm.length - 1] * 0.92);
+      ctx.save();
+      ctx.fillStyle = '#2a3a5a';
+      ctx.beginPath();
+      ctx.arc(lastX - 2, lastY, 4, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = '#2a3a5a';
+      ctx.textAlign = 'right';
+      ctx.textBaseline = 'alphabetic';
+      ctx.font = '700 15px "Oswald", system-ui, sans-serif';
+      ctx.fillText('−$2.16M', lastX - 16, lastY + 20);
+      ctx.font = '500 9.5px "IBM Plex Mono", ui-monospace, monospace';
+      ctx.fillStyle = 'rgba(110,102,90,0.95)';
+      ctx.fillText('opportunity cost', lastX - 16, lastY + 32);
       ctx.restore();
     }
   }
