@@ -1758,7 +1758,7 @@
         <span class="mirror-title">Compound interest, finally pointed the other way</span>
       </div>
       <div class="mirror-canvas">
-        <canvas id="mirrorCanvas3" aria-label="A compound growth curve — what Jordan's $946 a month compounds to at 7% over 35 years."></canvas>
+        <canvas id="mirrorCanvas3" aria-label="A compound growth curve above the zero axis. The line draws from year 0 to year 6 — the same six years that paid off the loan in the alternate Tuesday — pauses to mark the moment payments would have stopped, then continues drawing without interruption through year 35, ending at roughly $1.76 million by age 65."></canvas>
       </div>
       <div class="mirror-axis-labels">
         <span class="upper">&uarr; What Jordan's $946/mo compounded to at 7% for 35 years</span>
@@ -2529,6 +2529,7 @@
       },
       yearTicks: [0, 10, 20, 30, 35],
       dataPoints: [
+        { yr: 6,  label: '~$92k',  subLabel: 'loan paid · payments continue' },
         { yr: 10, label: '~$174k' },
         { yr: 20, label: '~$513k' },
         { yr: 30, label: '~$1.19M' },
@@ -2558,7 +2559,19 @@
         { from: 6/35, to: 1,    durMs: 1700 },   // years 6 → 35: pure compounding
       ],
     },
-    { id: 'mirrorCanvas3', flipped: true,  scenario: 'continuous', lossFraction: 0 },
+    {
+      id: 'mirrorCanvas3',
+      flipped: true,
+      scenario: 'continuous',
+      upperFraction: 0,
+      animateField: 'upperFraction',
+      animateTo: 1,
+      animatePhases: [
+        { from: 0,     to: 6/35, durMs: 1100 },   // years 0 → 6: the alternate-Tuesday loan period
+        { hold: 900 },                            // pause: "loan paid · payments continue"
+        { from: 6/35, to: 1,    durMs: 1700 },   // years 6 → 35: the long climb to $1.76M
+      ],
+    },
   ];
 
   function drawMirror(canvasId, instance) {
@@ -2566,6 +2579,9 @@
     const scenarioName = instance.scenario;
     const showUpper    = instance.showUpper !== false; // default true (Act V finale)
     const lowerFrac    = instance.lossFraction || 0;
+    // upperFraction defaults to 1 (static, full curve). The Act V finale animates
+    // it 0 → 1 with a pause at 6/35 to mirror the Act IV cost curve's pacing.
+    const upperFrac    = instance.upperFraction != null ? instance.upperFraction : 1;
     const canvas = document.getElementById(canvasId);
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
@@ -2618,18 +2634,21 @@
     const upperNorm = upperVals.map(v => v / upperMax);
 
     // ── UPPER CURVE (Act V finale only — skipped when showUpper is false) ──
-    if (showUpper) {
+    // Progressive: draws up to upperFrac, with a sweeping fill that follows.
+    if (showUpper && upperFrac > 0) {
+      const cut = Math.max(1, Math.floor((upperNorm.length - 1) * upperFrac));
       ctx.save();
       ctx.strokeStyle = '#3a7388';
       ctx.lineWidth = 2.25;
       ctx.beginPath();
-      upperNorm.forEach((v, i) => {
+      for (let i = 0; i <= cut; i++) {
+        const v = upperNorm[i];
         const x = padL + (i / (upperNorm.length - 1)) * innerW;
         const y = yForSigned(v * 0.92);
         i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
-      });
+      }
       ctx.stroke();
-      ctx.lineTo(W - padR, midY);
+      ctx.lineTo(padL + (cut / (upperNorm.length - 1)) * innerW, midY);
       ctx.lineTo(padL, midY);
       ctx.closePath();
       ctx.fillStyle = 'rgba(58,115,136,0.10)';
@@ -2664,9 +2683,9 @@
     const lane     = showUpper ? 1 : -1;
     const curveRGB = showUpper ? '58,115,136' : '42,58,90';
     const curveHex = showUpper ? '#3a7388'    : '#2a3a5a';
-    // For the lower-only Act IV chart, gate everything by how much of the
-    // curve has been drawn so labels appear as the line passes them.
-    const drawnFrac = showUpper ? 1 : lowerFrac;
+    // Gate everything (data points, annotation, endpoint) by how much of the
+    // active curve has been drawn so labels appear as the line passes them.
+    const drawnFrac = showUpper ? upperFrac : lowerFrac;
 
     // ── X-AXIS: year markers ──
     ctx.save();
