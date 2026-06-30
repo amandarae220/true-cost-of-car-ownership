@@ -1072,6 +1072,8 @@
     }
     .mirror-axis-labels .upper { color: var(--for-you); }
     .mirror-axis-labels .lower { color: var(--pitch); }
+    /* Single-label variant — when only the lower (or upper) caption applies. */
+    .mirror-axis-labels.single { grid-template-columns: 1fr; justify-items: center; text-align: center; }
     .mirror-canvas {
       position: relative;
       width: 100%;
@@ -1663,18 +1665,16 @@
   <article class="beat">
     <div class="mirror-wrap">
       <div class="mirror-caption">
-        <span class="mirror-title">Compound interest, shown both ways</span>
+        <span class="mirror-title">Compound interest, pointed at you</span>
       </div>
       <div class="mirror-canvas">
-        <canvas id="mirrorCanvas" aria-label="A two-sided chart. The upper half shows compound growth — the curve you've seen in retirement ads. The lower half is empty and will fill in as the story progresses."></canvas>
+        <canvas id="mirrorCanvas" aria-label="A chart whose curve sits entirely below the zero axis. The line draws from year 0 to year 6 — Jordan's loan period, $946 a month paid to the lender — pauses at the moment the loan is paid off, then continues drawing to year 35 with no new payments, showing the opportunity cost compounding into roughly negative 1.1 million dollars by age 65."></canvas>
       </div>
-      <!--div class="mirror-axis-labels">
-        <span class="upper">&uarr; What gains compound to (the version they show you in retirement ads)</span>
-        <span class="lower">&darr; What costs compound to (the version no ad ever shows you)</span>
-      </div-->
+      <div class="mirror-axis-labels single">
+        <span class="lower">&darr; What the same math takes from you when it's pointed the wrong way</span>
+      </div>
     </div>
-    <!--p class="beat-translation">Same math. Two different directions. The only difference is whether you find yourself in the driver's seat or along for the ride in the back seat.</p-->
-    <!--p class="beat-translation">If you've ever seen a retirement-account ad &mdash; <span class="mono-aside">"start at 25, retire a millionaire"</span> &mdash; that's the top half. The bottom half is what happens when the same force is making money from you, not for you.</p-->
+    <p class="beat-translation">You've seen the top half of this curve in every retirement-account ad &mdash; <span class="mono-aside">"start at 25, retire a millionaire"</span>. This is the same math, aimed the other way. The first six years are <strong>$946 a month flowing to the lender</strong>. Then the loan is paid off and Jordan stops sending money &mdash; but the math doesn't stop. <em>Time</em>, not contributions, does most of the work. That's the part no ad ever shows.</p>
   </article>
 
 </section>
@@ -2505,17 +2505,19 @@
         return v1 * Math.pow(1 + rMo, months - phaseEnd);
       },
       yearTicks: [0, 6, 15, 25, 35],
+      // Framed as the opportunity cost the cost-curve story imposes.
+      // Same magnitudes as the gains version — just negated.
       dataPoints: [
-        { yr: 6,  label: '~$144k', subLabel: 'contributions end' },
-        { yr: 20, label: '~$390k' },
-        { yr: 30, label: '~$780k' },
+        { yr: 6,  label: '−$144k', subLabel: 'loan paid · payments stop' },
+        { yr: 20, label: '−$390k' },
+        { yr: 30, label: '−$780k' },
       ],
-      endpointLabel: '~$1.1M',
-      endpointSub:   'no new contributions for 29 yrs',
+      endpointLabel: '−$1.1M',
+      endpointSub:   'opportunity cost · age 65',
       annotation: {
         spanRange: [0, 6],
         title:     '$946/mo',
-        sub:       'flowing in for 6 yrs (US avg)',
+        sub:       'paid to the lender · 6 yrs',
       },
     },
     continuous: {
@@ -2536,13 +2538,34 @@
     },
   };
 
+  /* Each instance picks a side of the axis. The Act IV primer hides the upper
+     curve entirely — the whole chart is the cost curve, drawn left → right with
+     a deliberate pause at the year-6 loan-payoff milestone. The Act V finale
+     stays upper-only.  `lossFraction` (0..1) is the single animated value;
+     `animatePhases` chains easing segments with holds in between. */
   const MIRROR_INSTANCES = [
-    { id: 'mirrorCanvas',  lossFraction: 0, flipped: false, scenario: 'twoPhase'   },
-    { id: 'mirrorCanvas2', lossFraction: 0, flipped: false, scenario: 'continuous', animateTo: 1 },
-    { id: 'mirrorCanvas3', lossFraction: 0, flipped: true,  scenario: 'continuous' },
+    {
+      id: 'mirrorCanvas',
+      flipped: false,
+      scenario: 'twoPhase',
+      showUpper: false,
+      lossFraction: 0,
+      animateField: 'lossFraction',
+      animateTo: 1,
+      animatePhases: [
+        { from: 0,     to: 6/35, durMs: 1100 },  // years 0 → 6: the loan period
+        { hold: 900 },                           // pause: "loan paid · payments stop"
+        { from: 6/35, to: 1,    durMs: 1700 },   // years 6 → 35: pure compounding
+      ],
+    },
+    { id: 'mirrorCanvas3', flipped: true,  scenario: 'continuous', lossFraction: 0 },
   ];
 
-  function drawMirror(canvasId, lossFraction, flipped, scenarioName) {
+  function drawMirror(canvasId, instance) {
+    const flipped      = instance.flipped;
+    const scenarioName = instance.scenario;
+    const showUpper    = instance.showUpper !== false; // default true (Act V finale)
+    const lowerFrac    = instance.lossFraction || 0;
     const canvas = document.getElementById(canvasId);
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
@@ -2594,26 +2617,29 @@
     const upperMax = upperVals[upperVals.length - 1];
     const upperNorm = upperVals.map(v => v / upperMax);
 
-    ctx.save();
-    ctx.strokeStyle = '#3a7388';
-    ctx.lineWidth = 2.25;
-    ctx.beginPath();
-    upperNorm.forEach((v, i) => {
-      const x = padL + (i / (upperNorm.length - 1)) * innerW;
-      const y = yForSigned(v * 0.92);
-      i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
-    });
-    ctx.stroke();
-    ctx.lineTo(W - padR, midY);
-    ctx.lineTo(padL, midY);
-    ctx.closePath();
-    ctx.fillStyle = 'rgba(58,115,136,0.10)';
-    ctx.fill();
-    ctx.restore();
+    // ── UPPER CURVE (Act V finale only — skipped when showUpper is false) ──
+    if (showUpper) {
+      ctx.save();
+      ctx.strokeStyle = '#3a7388';
+      ctx.lineWidth = 2.25;
+      ctx.beginPath();
+      upperNorm.forEach((v, i) => {
+        const x = padL + (i / (upperNorm.length - 1)) * innerW;
+        const y = yForSigned(v * 0.92);
+        i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+      });
+      ctx.stroke();
+      ctx.lineTo(W - padR, midY);
+      ctx.lineTo(padL, midY);
+      ctx.closePath();
+      ctx.fillStyle = 'rgba(58,115,136,0.10)';
+      ctx.fill();
+      ctx.restore();
+    }
 
-    // ── LOWER CURVE: reverse-compounding loss ──
-    if (lossFraction > 0) {
-      const cut = Math.floor(upperNorm.length * lossFraction);
+    // ── LOWER CURVE: progressive, animated via lossFraction ──
+    if (lowerFrac > 0) {
+      const cut = Math.floor(upperNorm.length * lowerFrac);
       ctx.save();
       ctx.strokeStyle = '#2a3a5a';
       ctx.lineWidth = 2.25;
@@ -2633,23 +2659,14 @@
       ctx.restore();
     }
 
-    // ── Ghost lower outline (primer state, when lower hasn't filled yet) ──
-    if (lossFraction < 1 && !flipped) {
-      ctx.save();
-      ctx.strokeStyle = 'rgba(42,58,90,0.45)';
-      ctx.lineWidth = 1.25;
-      ctx.setLineDash([3, 4]);
-      ctx.beginPath();
-      const startI = Math.floor(upperNorm.length * lossFraction);
-      for (let i = startI; i < upperNorm.length; i++) {
-        const v = upperNorm[i];
-        const x = padL + (i / (upperNorm.length - 1)) * innerW;
-        const y = yForSigned(-v * 0.92);
-        i === startI ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
-      }
-      ctx.stroke();
-      ctx.restore();
-    }
+    // The curve we're annotating: if there's an upper, attach to it (Act V);
+    // otherwise attach to the lower (Act IV). `lane` flips vertical positions.
+    const lane     = showUpper ? 1 : -1;
+    const curveRGB = showUpper ? '58,115,136' : '42,58,90';
+    const curveHex = showUpper ? '#3a7388'    : '#2a3a5a';
+    // For the lower-only Act IV chart, gate everything by how much of the
+    // curve has been drawn so labels appear as the line passes them.
+    const drawnFrac = showUpper ? 1 : lowerFrac;
 
     // ── X-AXIS: year markers ──
     ctx.save();
@@ -2686,18 +2703,20 @@
     ctx.fillText('$0', padL - 4, midY);
     ctx.restore();
 
-    // ── DATA POINTS along the upper curve ──
-    // Dashed guide lines from the zero axis up to a dot on the curve, with
-    // a dollar label above each dot. Anchors abstract growth to real numbers.
+    // ── DATA POINTS ──
+    // On the upper curve when showUpper, on the lower when not. Each dot
+    // appears once drawnFrac has passed its year — for the Act IV chart this
+    // means the dots emerge in lockstep with the line.
     ctx.save();
     DOLLAR_POINTS.forEach(({ yr, label, subLabel }) => {
       const t_norm = yr / yearsShown;
+      if (t_norm > drawnFrac + 0.001) return;
       const idx = Math.round(t_norm * (upperNorm.length - 1));
       const v = upperNorm[idx];
       const x = padL + t_norm * innerW;
-      const y = yForSigned(v * 0.92);
-      // Dashed guide
-      ctx.strokeStyle = 'rgba(58,115,136,0.30)';
+      const y = yForSigned(v * 0.92 * lane);
+      // Dashed guide from the zero axis out to the curve
+      ctx.strokeStyle = `rgba(${curveRGB},0.30)`;
       ctx.lineWidth = 1;
       ctx.setLineDash([2, 3]);
       ctx.beginPath();
@@ -2706,137 +2725,154 @@
       ctx.stroke();
       // Dot — slightly larger when this point also marks a phase change
       ctx.setLineDash([]);
-      ctx.fillStyle = '#3a7388';
+      ctx.fillStyle = curveHex;
       ctx.beginPath();
       ctx.arc(x, y, subLabel ? 4 : 3, 0, Math.PI * 2);
       ctx.fill();
-      // Dollar label above the dot
-      ctx.fillStyle = '#3a7388';
+      // Dollar label — positioned outside the axis (above on upper, below on lower)
       ctx.font = '500 10.5px "IBM Plex Mono", ui-monospace, monospace';
       ctx.textAlign = 'center';
-      ctx.textBaseline = 'bottom';
-      ctx.fillText(label, x, y - 7);
-      // Optional sub-label (e.g. "contributions end" at the phase-change point)
+      ctx.fillStyle = curveHex;
+      if (lane === 1) {
+        ctx.textBaseline = 'bottom';
+        ctx.fillText(label, x, y - 7);
+      } else {
+        ctx.textBaseline = 'top';
+        ctx.fillText(label, x, y + 8);
+      }
+      // Optional sub-label (e.g. "loan paid · payments stop" at year 6)
       if (subLabel) {
         ctx.font = '500 9px "IBM Plex Mono", ui-monospace, monospace';
         ctx.fillStyle = 'rgba(110,102,90,0.95)';
-        ctx.fillText(subLabel, x, y - 20);
+        if (lane === 1) ctx.fillText(subLabel, x, y - 20);
+        else            ctx.fillText(subLabel, x, y + 21);
       }
     });
     ctx.restore();
 
-    // ── Scenario annotation: tiny label naming the underlying assumption,
-    //    pointing to a HIGHLIGHTED SEGMENT of the curve (the contribution
-    //    phase, where the dollars are actually flowing in). The thickened
-    //    segment makes it clear which part of the curve the dollars produced. ──
+    // ── Scenario annotation: thickened segment + title ──
+    // For the Act IV (lower-only) chart, the segment is the loan-period portion
+    // of the curve. It draws in along with the curve and stops at whatever year
+    // the animation has reached.
     if (scenario.annotation && scenario.annotation.spanRange) {
       const a = scenario.annotation;
-      const labelX = padL + 28;
-      const labelY = padT + 8;
       const [yr1, yr2] = a.spanRange;
+      const annT = Math.max(0, Math.min(drawnFrac, yr2 / yearsShown));
       const idx1 = Math.round((yr1 / yearsShown) * (upperNorm.length - 1));
-      const idx2 = Math.round((yr2 / yearsShown) * (upperNorm.length - 1));
-      const midIdx = Math.round((idx1 + idx2) / 2);
-      const midX = padL + (midIdx / (upperNorm.length - 1)) * innerW;
-      const midYC = yForSigned(upperNorm[midIdx] * 0.92);
+      const idx2 = Math.round(annT * (upperNorm.length - 1));
+      if (idx2 > idx1) {
+        const midIdx = Math.round((idx1 + idx2) / 2);
+        const midX = padL + (midIdx / (upperNorm.length - 1)) * innerW;
+        const midYC = yForSigned(upperNorm[midIdx] * 0.92 * lane);
+        // Label position: top-left for upper, bottom-left for lower
+        const labelX = padL + 28;
+        const labelY = lane === 1 ? padT + 8 : H - padB - 38;
+        const connY  = lane === 1 ? labelY + 34 : labelY;
 
-      ctx.save();
-      // Thicker, brighter curve segment over the contribution range
-      ctx.strokeStyle = '#3a7388';
-      ctx.lineWidth = 4.5;
-      ctx.lineCap = 'round';
-      ctx.setLineDash([]);
-      ctx.beginPath();
-      for (let i = idx1; i <= idx2; i++) {
-        const v = upperNorm[i];
-        const x = padL + (i / (upperNorm.length - 1)) * innerW;
-        const y = yForSigned(v * 0.92);
-        i === idx1 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+        ctx.save();
+        // Thicker, brighter curve segment over the labeled range
+        ctx.strokeStyle = curveHex;
+        ctx.lineWidth = 4.5;
+        ctx.lineCap = 'round';
+        ctx.setLineDash([]);
+        ctx.beginPath();
+        for (let i = idx1; i <= idx2; i++) {
+          const v = upperNorm[i];
+          const x = padL + (i / (upperNorm.length - 1)) * innerW;
+          const y = yForSigned(v * 0.92 * lane);
+          i === idx1 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+        }
+        ctx.stroke();
+        // Connector from label to segment midpoint
+        ctx.strokeStyle = `rgba(${curveRGB},0.55)`;
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(labelX + 24, connY);
+        ctx.lineTo(midX, midYC);
+        ctx.stroke();
+        // Title — Oswald
+        ctx.fillStyle = curveHex;
+        ctx.font = '700 15px "Oswald", system-ui, sans-serif';
+        ctx.textAlign = 'left';
+        ctx.textBaseline = 'top';
+        ctx.fillText(a.title, labelX, labelY);
+        // Sub — mono, muted
+        ctx.fillStyle = 'rgba(110,102,90,0.95)';
+        ctx.font = '500 9.5px "IBM Plex Mono", ui-monospace, monospace';
+        ctx.fillText(a.sub, labelX, labelY + 18);
+        ctx.restore();
       }
-      ctx.stroke();
-      // Connector from below the label to the segment midpoint
-      ctx.strokeStyle = 'rgba(58,115,136,0.55)';
-      ctx.lineWidth = 1;
-      ctx.beginPath();
-      ctx.moveTo(labelX + 24, labelY + 34);
-      ctx.lineTo(midX, midYC);
-      ctx.stroke();
-      // Title — Oswald, steel teal
-      ctx.fillStyle = '#3a7388';
-      ctx.font = '700 15px "Oswald", system-ui, sans-serif';
-      ctx.textAlign = 'left';
-      ctx.textBaseline = 'top';
-      ctx.fillText(a.title, labelX, labelY);
-      // Sub — mono, muted
-      ctx.fillStyle = 'rgba(110,102,90,0.95)';
-      ctx.font = '500 9.5px "IBM Plex Mono", ui-monospace, monospace';
-      ctx.fillText(a.sub, labelX, labelY + 18);
-      ctx.restore();
     }
 
-    // ── Endpoint annotation: $2.16M / at age 65 (both states) ──
-    {
+    // ── Endpoint annotation ──
+    // Drawn only once the curve has reached the far right. For the Act V finale
+    // the endpoint gets the ringed dot; the Act IV cost curve gets a plain dot.
+    if (drawnFrac >= 0.995) {
       const lastX = padL + innerW;
-      const lastY = yForSigned(upperNorm[upperNorm.length - 1] * 0.92);
+      const lastY = yForSigned(upperNorm[upperNorm.length - 1] * 0.92 * lane);
       ctx.save();
-      // Flipped variant: emphasis dot + ring for finale
       if (flipped) {
-        ctx.fillStyle = '#3a7388';
+        ctx.fillStyle = curveHex;
         ctx.beginPath();
         ctx.arc(lastX, lastY, 5, 0, Math.PI * 2);
         ctx.fill();
-        ctx.strokeStyle = 'rgba(58,115,136,0.35)';
+        ctx.strokeStyle = `rgba(${curveRGB},0.35)`;
         ctx.lineWidth = 1.5;
         ctx.beginPath();
         ctx.arc(lastX, lastY, 10, 0, Math.PI * 2);
         ctx.stroke();
       } else {
-        // Primer: small dot only
-        ctx.fillStyle = '#3a7388';
+        ctx.fillStyle = curveHex;
         ctx.beginPath();
-        ctx.arc(lastX, lastY, 3, 0, Math.PI * 2);
+        ctx.arc(lastX - 2, lastY, lane === 1 ? 3 : 4, 0, Math.PI * 2);
         ctx.fill();
       }
-      // Dollar callout — right-aligned so it doesn't run off canvas
-      ctx.fillStyle = '#3a7388';
+      // Dollar callout — placed outside the axis on the curve's side
+      ctx.fillStyle = curveHex;
       ctx.textAlign = 'right';
       ctx.textBaseline = 'alphabetic';
       ctx.font = '700 17px "Oswald", system-ui, sans-serif';
-      ctx.fillText(ENDPOINT_LABEL, lastX - 14, lastY - 12);
+      const lblDY = lane === 1 ? -12 : 22;
+      const subDY = lane === 1 ?   2 : 36;
+      ctx.fillText(ENDPOINT_LABEL, lastX - 14, lastY + lblDY);
       ctx.font = '500 9.5px "IBM Plex Mono", ui-monospace, monospace';
       ctx.fillStyle = 'rgba(110,102,90,0.95)';
-      ctx.fillText(ENDPOINT_SUB, lastX - 14, lastY + 2);
-      ctx.restore();
-    }
-
-    // ── Loss endpoint: −$X callout for filled lower curve (Act IV reveal in main) ──
-    if (lossFraction >= 1) {
-      const lastX = padL + innerW;
-      const lastY = yForSigned(-upperNorm[upperNorm.length - 1] * 0.92);
-      ctx.save();
-      ctx.fillStyle = '#2a3a5a';
-      ctx.beginPath();
-      ctx.arc(lastX - 2, lastY, 4, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.fillStyle = '#2a3a5a';
-      ctx.textAlign = 'right';
-      ctx.textBaseline = 'alphabetic';
-      ctx.font = '700 15px "Oswald", system-ui, sans-serif';
-      ctx.fillText('−$2.16M', lastX - 16, lastY + 20);
-      ctx.font = '500 9.5px "IBM Plex Mono", ui-monospace, monospace';
-      ctx.fillStyle = 'rgba(110,102,90,0.95)';
-      ctx.fillText('opportunity cost', lastX - 16, lastY + 32);
+      ctx.fillText(ENDPOINT_SUB, lastX - 14, lastY + subDY);
       ctx.restore();
     }
   }
 
   function drawAllMirrors() {
-    MIRROR_INSTANCES.forEach(m => drawMirror(m.id, m.lossFraction, m.flipped, m.scenario));
+    MIRROR_INSTANCES.forEach(m => drawMirror(m.id, m));
   }
 
   /* Scroll-triggered animation: when a mirror with `animateTo` enters the
-     viewport for the first time, ease its lossFraction from current → target
-     over ~1.4 s. The lower navy curve "draws itself in" as the reader arrives. */
+     viewport, run its `animatePhases` (eased segments + holds) in sequence.
+     A single-segment `animateTo` works as the simple fallback. */
+  function runMirrorPhases(mi) {
+    const field  = mi.animateField || 'lossFraction';
+    const phases = mi.animatePhases || [
+      { from: mi[field] || 0, to: mi.animateTo, durMs: mi.animateDuration || 1400 }
+    ];
+    let i = 0;
+    function next() {
+      if (i >= phases.length) { mi._animating = false; mi._done = true; return; }
+      const p = phases[i++];
+      if (p.hold != null) { setTimeout(next, p.hold); return; }
+      const start = performance.now();
+      function tick(now) {
+        const t = Math.min((now - start) / p.durMs, 1);
+        const eased = 1 - Math.pow(1 - t, 3);
+        mi[field] = p.from + (p.to - p.from) * eased;
+        drawMirror(mi.id, mi);
+        if (t < 1) requestAnimationFrame(tick);
+        else next();
+      }
+      requestAnimationFrame(tick);
+    }
+    next();
+  }
+
   function watchMirrorAnimations() {
     const animated = MIRROR_INSTANCES.filter(m => m.animateTo != null);
     if (!animated.length) return;
@@ -2847,19 +2883,7 @@
         const mi = MIRROR_INSTANCES.find(m => m.id === id);
         if (!mi || mi._animating || mi._done) return;
         mi._animating = true;
-        const start = performance.now();
-        const from  = mi.lossFraction;
-        const to    = mi.animateTo;
-        const dur   = 1400;
-        function tick(now) {
-          const t = Math.min((now - start) / dur, 1);
-          const eased = 1 - Math.pow(1 - t, 3);
-          mi.lossFraction = from + (to - from) * eased;
-          drawMirror(mi.id, mi.lossFraction, mi.flipped, mi.scenario);
-          if (t < 1) requestAnimationFrame(tick);
-          else { mi._animating = false; mi._done = true; }
-        }
-        requestAnimationFrame(tick);
+        runMirrorPhases(mi);
         io.unobserve(entry.target);
       });
     }, { threshold: 0.35 });
