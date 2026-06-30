@@ -11,13 +11,13 @@
 
 A self-contained, single-page data viz built to answer one question: what does buying the average new car *actually* cost over a working life? Not the sticker. Not the monthly payment. The whole thing — interest, mandatory full-coverage insurance, depreciation, and the retirement contribution that didn't happen.
 
-The piece runs on a recurring **BROCHURE ↔ RECEIPT** device: on each beat, the dealership's version of the math sits on the left, and the part they leave off sits on the right. The reader meets Jordan — a fictional 30-year-old buying their first new car on a Tuesday — and follows the actual US averages (KBB, Experian, NPR, Bankrate, BTS) through six years of payments, then the alternate Tuesday that would have built ~$2.16M instead.
+The piece runs on a recurring **BROCHURE ↔ RECEIPT** device: on each beat, the dealership's version of the math sits on the left, and the part they leave off sits on the right. The reader meets Jordan — a fictional 30-year-old buying their first new car on a Tuesday — and follows the actual US averages (KBB, Experian, NPR, Bankrate, BTS) through six years of payments, then the alternate Tuesday that would have built ~$1.76M instead.
 
 Interactive moments anchor the argument at the points where it matters most:
 
 - A **trade-in cadence** slider showing lifetime depreciation across multiple new-car cycles.
 - A **counterfactual fork** letting the reader plug in their own used-car price and expected return rate.
-- A signature **mirror curve** visualization with two scenarios: 6 years of redirected contributions (~$1.1M) and a lifetime of them ($2.16M).
+- A signature **mirror curve** visualization with two scenarios: 6 years of redirected contributions (~$674k) and a lifetime of them (~$1.76M).
 - A **US-average calculator** at the end so the reader can plug in their own Tuesday and watch the depreciation, the interest, and the alternate Tuesday redraw themselves.
 - An **FAQ accordion** covering the rationalizations (*"a new car is more reliable, I'll keep it forever, I deserve this"*) and the nuance (*"isn't all debt bad? — no, here's when it isn't"*).
 
@@ -43,7 +43,7 @@ This is the part recruiters and senior devs usually don't read on a single-HTML 
 The signature *Compound interest, shown both ways* curve is rendered in raw `<canvas>` rather than Chart.js, for several specific reasons:
 
 1. **Per-canvas scenarios.** The same drawing function handles two different curve models. The **`twoPhase` scenario** (Act I primer) plots an annuity that contributes $946/mo for 69 months, *then stops*, and lets the balance compound at 7% through year 35. The **`continuous` scenario** (Act III finale) plots the same money flowing continuously for the full 35 years. The two scenarios share rendering code but diverge mathematically — a flexibility a generic charting library doesn't give you cleanly.
-2. **Editorial annotations baked into the canvas.** Year-axis ticks, dollar-value data point labels, an endpoint callout (`$2.16M / at age 65`), a highlighted *contribution-phase segment* with a connector line, a "$0" anchor at the zero axis — all hand-positioned. Chart.js would technically do this with plugins, but the layout precision would be fighting the library.
+2. **Editorial annotations baked into the canvas.** Year-axis ticks, dollar-value data point labels, an endpoint callout (`$1.76M / at age 65`), a highlighted *contribution-phase segment* with a connector line, a "$0" anchor at the zero axis — all hand-positioned. Chart.js would technically do this with plugins, but the layout precision would be fighting the library.
 3. **Devicepixelratio-aware drawing.** Canvas pixels are scaled to match the device's pixel ratio for crisp lines on retina screens. The hero visual matters; pixelation would undermine it.
 4. **Scroll-triggered fill animation.** When the Act III mirror chart enters the viewport, the lower navy "loss" curve draws itself in stroke-by-stroke over ~1.4s with ease-out cubic. Implemented with `IntersectionObserver` + `requestAnimationFrame`, lossFraction interpolated over a `MIRROR_INSTANCES` config object so any future canvas can opt in by setting `animateTo`.
 
@@ -51,7 +51,7 @@ The signature *Compound interest, shown both ways* curve is rendered in raw `<ca
 
 Three sliders distributed across the piece each run live annuity math on every `input` event:
 - The **trade-in cadence widget** rebuilds a lifetime cycle bar + three dependent stats (cars bought, lifetime depreciation, lifetime interest) on every drag, with the cycle bar regenerated as `flex`-distributed segments tinted from full-saturation navy to ghost.
-- The **counterfactual sliders** (used-car price + return rate) compound the redirected lump and monthly annuity through 35 years and update the headline `~$2.16M` finale in real time.
+- The **counterfactual sliders** (used-car price + return rate) compound the redirected down payment and monthly annuity through 35 years and update the headline `~$1.76M` finale in real time.
 - The **end-of-piece calculator** runs a 7-year amortization, a 12-bucket per-year depreciation model, and a 35-year monthly investment simulation on every slider movement — driving three Chart.js charts and four summary cards.
 
 ### Production polish details

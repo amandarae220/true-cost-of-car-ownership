@@ -1735,9 +1735,9 @@
             <div class="receipt-range-labels"><span>3% &mdash; bonds</span><span>10% &mdash; nominal S&amp;P</span></div>
           </li>
           <li class="receipt-line">
-            <span class="receipt-label">Upfront lump available to invest</span>
+            <span class="receipt-label">Down payment kept &amp; invested instead</span>
             <span class="receipt-dots"></span>
-            <span class="receipt-value live" id="cf-lump-out">$42,326</span>
+            <span class="receipt-value live" id="cf-lump-out">$5,000</span>
           </li>
           <li class="receipt-line">
             <span class="receipt-label">Years until age 65</span>
@@ -1767,7 +1767,7 @@
     </div>
     <div class="mirror-finale">
       <span class="mirror-finale-label">At age 65, what your Tuesday became</span>
-      <div class="mirror-finale-num" id="cf-finale">$2,160,000</div>
+      <div class="mirror-finale-num" id="cf-finale">$1,760,000</div>
       <p class="mirror-finale-sub">Same Tuesday. Same income. Same car ad on the radio. Different math.</p>
     </div>
     <p class="beat-translation">It's the same shape. Same curvature. Same force. The only thing that changed is which side of zero it's pointed at &mdash; and that's a choice Jordan made on a Tuesday afternoon. <strong>The dealership doesn't care about Jordan's retirement. That's not their job.</strong> But the math doesn't care about the dealership, either. It just compounds. In whichever direction you aim it.</p>
@@ -2478,16 +2478,16 @@
      Each mirror canvas references one of these by name. The scenario controls
      the shape of the curve (and the dollar labels along it). Two scenarios:
 
-     1. twoPhase — Act I primer.
-        Contribute $946/mo for the loan period (69 months) PLUS an upfront
-        $42,326 lump (the difference between a new car and a used one), then
-        STOP contributing. Let it compound at 7% through year 35. The slope
-        change at year 6 is the lesson: time, not contributions, does most
-        of the work.
+     1. twoPhase — Act IV cost curve.
+        Contribute $946/mo for the loan period (69 months) PLUS a $5,000
+        upfront lump (the down payment Jordan would otherwise have made on
+        the new car), then STOP contributing. Let it compound at 7% through
+        year 35. The slope change at year 6 is the lesson: time, not
+        contributions, does most of the work.
 
-     2. continuous — Act IV reveal + Act V flip.
-        Contribute $946/mo for all 35 years, plus the same $42,326 lump.
-        The "lifetime discipline" ceiling. Lands at $2.16M.
+     2. continuous — Act V finale.
+        Contribute $946/mo for all 35 years, plus the same $5,000 down
+        payment. The "lifetime discipline" ceiling. Lands at ~$1.76M.
 
      The dollar figures along each curve are tied to the actual annuity math
      so a reader can recognize the endpoint number in the surrounding copy. */
@@ -2495,7 +2495,7 @@
     twoPhase: {
       yearsShown: 35,
       valueAt(months) {
-        const rMo = 0.07 / 12, lump = 42326, monthly = 946, phaseEnd = 69;
+        const rMo = 0.07 / 12, lump = 5000, monthly = 946, phaseEnd = 69;
         if (months <= phaseEnd) {
           return lump * Math.pow(1 + rMo, months)
                + monthly * (Math.pow(1 + rMo, months) - 1) / rMo;
@@ -2508,11 +2508,11 @@
       // Framed as the opportunity cost the cost-curve story imposes.
       // Same magnitudes as the gains version — just negated.
       dataPoints: [
-        { yr: 6,  label: '−$144k', subLabel: 'loan paid · payments stop' },
-        { yr: 20, label: '−$390k' },
-        { yr: 30, label: '−$780k' },
+        { yr: 6,  label: '−$89k',  subLabel: 'loan paid · payments stop' },
+        { yr: 20, label: '−$237k' },
+        { yr: 30, label: '−$476k' },
       ],
-      endpointLabel: '−$1.1M',
+      endpointLabel: '−$674k',
       endpointSub:   'opportunity cost · age 65',
       annotation: {
         spanRange: [0, 6],
@@ -2523,17 +2523,17 @@
     continuous: {
       yearsShown: 35,
       valueAt(months) {
-        const rMo = 0.07 / 12, lump = 42326, monthly = 946;
+        const rMo = 0.07 / 12, lump = 5000, monthly = 946;
         return lump * Math.pow(1 + rMo, months)
              + monthly * (Math.pow(1 + rMo, months) - 1) / rMo;
       },
       yearTicks: [0, 10, 20, 30, 35],
       dataPoints: [
-        { yr: 10, label: '~$250k' },
-        { yr: 20, label: '~$660k' },
-        { yr: 30, label: '~$1.5M' },
+        { yr: 10, label: '~$174k' },
+        { yr: 20, label: '~$513k' },
+        { yr: 30, label: '~$1.19M' },
       ],
-      endpointLabel: '$2.16M',
+      endpointLabel: '$1.76M',
       endpointSub:   'at age 65',
     },
   };
@@ -3058,14 +3058,14 @@
     const finaleOut   = document.getElementById('cf-finale');
     if (!used || !rate) return;
 
-    const NEW_PRICE = 50326;
-    const MONTHLY   = 946;
-    const YEARS     = 35;
+    const DOWN_PAYMENT = 5000;   // the down payment Jordan would have made on the new car
+    const MONTHLY      = 946;
+    const YEARS        = 35;
 
     function upd() {
       const usedPrice = +used.value;
       const annualRate = +rate.value / 100;
-      const lump = NEW_PRICE - usedPrice;
+      const lump = DOWN_PAYMENT;
 
       // Future value of upfront lump compounded monthly
       const rMo = annualRate / 12;
