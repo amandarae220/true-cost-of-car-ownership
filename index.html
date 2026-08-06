@@ -1007,6 +1007,14 @@
       max-width: 480px;
       margin: 0 auto;
     }
+    .mirror-finale-note {
+      font-family: 'IBM Plex Mono', ui-monospace, monospace;
+      font-size: 0.72rem;
+      line-height: 1.55;
+      color: var(--muted);
+      max-width: 520px;
+      margin: 1rem auto 0;
+    }
 
     /* ── Variant: Act III flips the BROCHURE column into the buyer's own
          rationalization. Same frame, different label color so the reader
@@ -1488,15 +1496,7 @@
 <section class="act act-1" id="act-1">
   <div class="act-intro">
     <h2 class="act-title">How to tell if you're buying a car or paying for a car subscription</h2>
-    <p class="act-lede">Everybody is talking about it: The price of a new car has increased 30% from 2019 to 2025. 
-      However, the explicit cost of a car is only part of the story. 
-      <!--In 2017, the ChooseFI podcast released an episode called <a href="https://choosefi.com/podcast-episode/022-true-cost-car-ownership">The 
-        True Cost Of Car Ownership</a> which covers both the implicit and explicit costs of car ownership.-->
-      <!--It's left up to the buyer to do the calculations (most don't). 
-      So I did them for you. Pull up a chair and pour a coffee.</p-->
-    <p></p>
-    <!--p class="act-lede">Most Americans have seen a dealership advertisement for a new car. The tiny asterisk next to an advertised car payment hints at a hidden truth. 
-      </p-->
+    <p class="act-lede">New-car prices are up 30% since 2019. That's the part everyone's talking about. Here's the part they're not.</p>
   </div>
 
   <!-- Beat 1 — The brochure (standalone artifact: introduces the device) -->
@@ -1507,7 +1507,7 @@
       <p class="brochure-sub">* For well-qualified buyers. See dealer for details.</p>
     </div>
     <p class="beat-translation">Most Americans have seen a dealership advertisement for a new car. 
-      It most likely contains a tiny asterisk next to an advertised car payment that hints at a hidden truth. An asterisk small enough to completely gloss over. <strong>This visualization shows the cost of ignoring that asterisk.</strong></p>
+      It most likely contains a tiny asterisk next to an advertised car payment. <strong>This visualization shows the cost of ignoring that asterisk.</strong></p>
   </article>
 </section>
 
@@ -1521,7 +1521,7 @@
   <div class="act-intro">     
     <h2 class="act-title">Money talks</h2>
     <!--p class="act-lede">Jordan is thirty. Just got promoted. Has been driving the same hand-me-down sedan since college and figures it's <em>time</em>. Walks into a dealership. The salesperson is friendly. The brochure is clean. The numbers feel reasonable. Here's what's actually being shown &mdash; and what's quietly not.</p-->
-    <p class="act-lede">After a few test drives, its time to get down to business. The sales person will begin crunching the numbers. Unsurprisingly, the total monthly amount will air closer to $767 (the average car payment in the US)</p>
+    <p class="act-lede">The test drives are over. The salesperson opens the calculator. The monthly payment lands closer to $787 &mdash; the US average &mdash; than the $399 advertised.</p>
   </div>
 
   <!-- Beat 3 — Sticker price -->
@@ -1616,7 +1616,7 @@
       <p class="stat-aside-text"><strong>$787/mo is the average.</strong> 
         19% of car loans now run over a thousand dollars a month making it the second largest expense category for Americans behind housing. </p>
     </aside>
-    <p class="beat-translation">Most people only ever check the monthly. Its not $399 but $787 sounds doable. <strong>$8,977 in interest</strong>, paid quietly over six years, (roughly a year of groceries) &mdash; handed to the bank for the privilege of borrowing money Jordan didn't have.</p>
+    <p class="beat-translation">Most people only ever check the monthly. It's not $399, but $787 sounds doable. <strong>$8,977 in interest</strong>, paid quietly over six years (roughly a year of groceries) &mdash; handed to the bank for the privilege of borrowing money that the buyer didn't have.</p>
   </article>
 
   <!-- Beat 5 — The hidden insurance -->
@@ -1641,7 +1641,7 @@
             <span class="receipt-value hidden">$220/mo</span>
           </li>
           <li class="receipt-line">
-            <span class="receipt-label">Difference forced on you</span>
+            <span class="receipt-label">Difference due to financing</span>
             <span class="receipt-dots"></span>
             <span class="receipt-value hidden">+ $159/mo</span>
           </li>
@@ -1674,7 +1674,7 @@
         <span class="lower">&darr; What the same math takes from you when it's pointed the wrong way</span>
       </div>
     </div>
-    <p class="beat-translation">You've seen the top half of this curve in every retirement-account ad &mdash; <span class="mono-aside">"start at 25, retire a millionaire"</span>. This is the same math, aimed the other way. The first six years are <strong>$946 a month flowing to the lender</strong>. Then the loan is paid off and Jordan stops sending money &mdash; but the math doesn't stop. <em>Time</em>, not contributions, does most of the work. That's the part no ad ever shows.</p>
+    <p class="beat-translation">You've seen the top half of this curve in every retirement-account ad &mdash; <span class="mono-aside">"start at 25, retire a millionaire"</span>. This is the same compound-interest formula, pointed at the lender instead of at the buyer. The first six years are <strong>$946 a month flowing out</strong>. Then the loan is paid off and Jordan stops sending money &mdash; but the math doesn't stop. <em>Time</em>, not contributions, does most of the work. That's the part no ad ever shows.</p>
   </article>
 
 </section>
@@ -1769,8 +1769,9 @@
       <span class="mirror-finale-label">At age 65, what your Tuesday became</span>
       <div class="mirror-finale-num" id="cf-finale">$1,760,000</div>
       <p class="mirror-finale-sub">Same Tuesday. Same income. Same car ad on the radio. Different math.</p>
+      <p class="mirror-finale-note">Assumes 7% real returns held for 35 years, a used Corolla that doesn't hit a repair spike the new car's warranty would have covered, and $946 actually landing in an investment account every month. Wobble any of those and the endpoint moves.</p>
     </div>
-    <p class="beat-translation">It's the same shape. Same curvature. Same force. The only thing that changed is which side of zero it's pointed at &mdash; and that's a choice Jordan made on a Tuesday afternoon. <strong>The dealership doesn't care about Jordan's retirement. That's not their job.</strong> But the math doesn't care about the dealership, either. It just compounds. In whichever direction you aim it.</p>
+    <p class="beat-translation">Same shape. Same curvature. Same force. The only thing that changed is which side of zero it's pointed at &mdash; and that's a choice Jordan made on a Tuesday afternoon. The math just compounds. In whichever direction you aim it.</p>
   </article>
 
 </section>
@@ -1831,7 +1832,7 @@
         <p class="receipt-foot">$787 &minus; $399 = $388/mo of asterisk. Over 69 months of payments, that's <strong>$26,772</strong> the brochure never had room to mention.</p>
       </div>
     </div>
-    <p class="beat-translation">The $399 ad isn't a lie. In development, its what we call the "happy path". To actually pay $399 you have to hit <strong>every single one</strong> of those conditions &mdash; right car, right credit, right down, right term. Miss any of them &mdash; which is what happens to the average buyer &mdash; and the number climbs to $787. Miss a few more, or pick a slightly nicer trim, or have a less-than-perfect credit score, and you're in the <strong>19% paying over $1,000/mo</strong>. Same dealership. Same Saturday. <em>The number on the brochure is the number for someone else.</em></p>
+    <p class="beat-translation">The $399 ad isn't a lie. In development, it's what we call the "happy path." To actually pay $399 you have to hit <strong>every single one</strong> of those conditions &mdash; right car, right credit, right down, right term. Miss any of them &mdash; which is what happens to the average buyer &mdash; and the number climbs to $787. Miss a few more, or pick a slightly nicer trim, or have a less-than-perfect credit score, and you're in the <strong>19% paying over $1,000/mo</strong>. Same dealership. Same Saturday. <em>The number on the brochure is the number for someone else.</em></p>
   </article>
 
 </section>
@@ -2127,7 +2128,7 @@
 ══════════════════════════════════════ -->
 <section class="act">
   <div class="rule-callout" style="margin-bottom:2.5rem;">
-    <p class="rule-text"><strong>Compound interest works <em>for</em> you</strong> when your investment outpaces your debt. <strong>It works against you</strong> when your debt outpaces your investment &mdash; or when what you bought with the debt is losing value. That's the only sentence in this whole piece you actually have to remember.</p>
+    <p class="rule-text"><strong>Compound interest works <em>for</em> you</strong> when your investment outpaces your debt. <strong>It works against you</strong> when it doesn't &mdash; or when what you bought with the debt is losing value.</p>
     <div class="rule-attrib">The rule, in plain language</div>
   </div>
   <div class="series-handoff" style="margin-top:0;">
